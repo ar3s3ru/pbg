@@ -49,7 +49,7 @@ type(
     SMConstructor func(cfg IConfiguration) ISessionsMechanism
 )
 
-// Builder functions ----------------------------------------------------------- //
+// Builder methods ------------------------------------------------------------- //
 // ----------------------------------------------------------------------------- //
 func Builder() PBGBuilder {
     return &pbgBuilder{}
@@ -103,6 +103,8 @@ func (builder *pbgBuilder) Build() PBGServer {
         authMechanism := builder.amCallback(builder.config)
         sessMechanism := builder.smCallback(builder.config)
 
+        // TODO: aggiungere null-checks
+
         return &pbgServer{
             dataMechanism: dataMechanism,
             authMechanism: authMechanism,
@@ -115,7 +117,7 @@ func (builder *pbgBuilder) Build() PBGServer {
 // ----------------------------------------------------------------------------- //
 // ----------------------------------------------------------------------------- //
 
-// Server functions ------------------------------------------------------------ //
+// Server methods -------------------------------------------------------------- //
 // ----------------------------------------------------------------------------- //
 func (srv *pbgServer) StartServer() {
     log.Fatal(fasthttp.ListenAndServe(
