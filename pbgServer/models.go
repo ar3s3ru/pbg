@@ -1,7 +1,5 @@
 package pbgServer
 
-import "time"
-
 type (
     Pokèmon interface {
         GetName()      string
@@ -16,10 +14,9 @@ type (
     }
 
     Trainer interface {
-        GetName() string
-        GetPasswordHash() string
+        User
         GetType() TrainerType
-        GetSignUpDate() time.Time
+        GetTeam() [6]PokèmonTeam
     }
 
     PokèmonTeam interface {

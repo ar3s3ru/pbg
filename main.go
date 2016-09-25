@@ -8,13 +8,17 @@ import (
     "github.com/ar3s3ru/PokemonBattleGo/pbgServer/mem"
 )
 
+func handleHello(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
+    fmt.Fprintf(ctx, "Called \"/hello\" with %v\n", sctx)
+}
+
 func getServer() pbgServer.PBGServer {
     return pbgServer.Builder().UseConfiguration(
         // Configuration from mem package
-        mem.ConfigBuilder().UseHTTPPort(8080).Build(),
+        mem.NewConfigBuilder().UseHTTPPort(8080).UsePokèmonFile("lol").Build(),
     ).UseDataMechanism(func(cfg pbgServer.IConfiguration) pbgServer.IDataMechanism {
-        fmt.Printf("Building Data Mechanism using %v\n", cfg)
-        return nil
+        memCfg := cfg.(mem.MemConfiguration)
+        return mem.NewDataBuilder().UsePokèmonFile(memCfg.GetPokèmonFile()).Build()
     }).UseAuthMechanism(func (cfg pbgServer.IConfiguration) pbgServer.IAuthMechanism {
         fmt.Printf("Building Auth Mechanism using %v\n", cfg)
         return nil
@@ -28,9 +32,9 @@ func main() {
     // Get server instance
     srv := getServer()
     // Handle HTTP request
-    srv.Handle(pbgServer.GET, "/hello", func(sctx pbgServer.IServerContext,
-                                             ctx *fasthttp.RequestCtx,
-                                             pm fasthttprouter.Params) {
-        fmt.Fprintf(ctx, "Called \"/hello\" with %v\n", sctx)
-    }).StartServer()    // Start HTTP server
+    srv.Handle(
+        pbgServer.GET,
+        "/hello",
+        handleHello,
+    ).StartServer()    // Start HTTP server
 }

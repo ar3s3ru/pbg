@@ -111,14 +111,14 @@ func (builder *pbgBuilder) Build() PBGServer {
     authMechanism := builder.amCallback(builder.config)
     sessMechanism := builder.smCallback(builder.config)
 
-    switch {
-    case dataMechanism == nil:
-        panic("DataMechanism not created in dedicated callback")
-    case authMechanism == nil:
-        panic("AuthMechanism not created in dedicated callback")
-    case sessMechanism == nil:
-        panic("SessMechanism not created in dedicated callback")
-    }
+    //switch {
+    //case dataMechanism == nil:
+    //    panic("DataMechanism not created in dedicated callback")
+    //case authMechanism == nil:
+    //    panic("AuthMechanism not created in dedicated callback")
+    //case sessMechanism == nil:
+    //    panic("SessMechanism not created in dedicated callback")
+    //}
 
     return &pbgServer{
         dataMechanism: dataMechanism,
