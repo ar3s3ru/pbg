@@ -5,11 +5,12 @@ import (
     "fmt"
     "github.com/valyala/fasthttp"
     "github.com/buaazp/fasthttprouter"
+    pbgMem "github.com/ar3s3ru/PokemonBattleGo/pbgServer/mem"
 )
 
 func main() {
     srv := pbgServer.Builder().UseConfiguration(
-        pbgServer.ObjectConfigurationBuilder(8080),
+        pbgMem.NewConfig(8080),
     ).UseDataMechanism(func(cfg pbgServer.IConfiguration) pbgServer.IDataMechanism {
         fmt.Printf("Building Data Mechanism using %v\n", cfg)
         return nil

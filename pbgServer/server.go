@@ -24,12 +24,19 @@ type(
         smCallback SMConstructor
     }
 
+    IServerContext interface {
+        GetDataMechanism() IDataMechanism
+        GetAuthMechanism() IAuthMechanism
+        GetSessMechanism() ISessionsMechanism
+    }
+
     PBGServer interface {
         IServerContext
         GetConfiguration() IConfiguration
 
         CheckInitialization() error
         StartServer()
+        Handle(HTTPMethod, string, Handler)
     }
 
     PBGBuilder interface {
@@ -98,20 +105,27 @@ func (builder *pbgBuilder) UseSessMechanism(callback SMConstructor) PBGBuilder {
 func (builder *pbgBuilder) Build() PBGServer {
     if builder.config == nil {
         panic("Configuration not set")
-    } else {
-        dataMechanism := builder.dmCallback(builder.config)
-        authMechanism := builder.amCallback(builder.config)
-        sessMechanism := builder.smCallback(builder.config)
+    }
 
-        // TODO: aggiungere null-checks
+    dataMechanism := builder.dmCallback(builder.config)
+    authMechanism := builder.amCallback(builder.config)
+    sessMechanism := builder.smCallback(builder.config)
 
-        return &pbgServer{
-            dataMechanism: dataMechanism,
-            authMechanism: authMechanism,
-            sessMechanism: sessMechanism,
-            configuration: builder.config,
-            httpRouter:    fasthttprouter.New(),
-        }
+    switch {
+    case dataMechanism == nil:
+        panic("DataMechanism not created in dedicated callback")
+    case authMechanism == nil:
+        panic("AuthMechanism not created in dedicated callback")
+    case sessMechanism == nil:
+        panic("SessMechanism not created in dedicated callback")
+    }
+
+    return &pbgServer{
+        dataMechanism: dataMechanism,
+        authMechanism: authMechanism,
+        sessMechanism: sessMechanism,
+        configuration: builder.config,
+        httpRouter:    fasthttprouter.New(),
     }
 }
 // ----------------------------------------------------------------------------- //
@@ -128,6 +142,18 @@ func (srv *pbgServer) StartServer() {
 
 func (srv *pbgServer) GetConfiguration() IConfiguration {
     return srv.configuration
+}
+
+func (srv *pbgServer) GetDataMechanism() IDataMechanism {
+    return srv.dataMechanism
+}
+
+func (srv *pbgServer) GetAuthMechanism() IAuthMechanism {
+    return srv.authMechanism
+}
+
+func (srv *pbgServer) GetSessMechanism() ISessionsMechanism {
+    return srv.sessMechanism
 }
 
 func (srv *pbgServer) CheckInitialization() error {
