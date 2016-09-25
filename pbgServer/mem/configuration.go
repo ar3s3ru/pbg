@@ -1,23 +1,46 @@
 package mem
 
+import (
+    "github.com/ar3s3ru/PokemonBattleGo/pbgServer"
+    "fmt"
+)
+
 type (
-    MemConfiguration struct {
+    memConfiguration struct {
         httpPort  int
         lstAndSrv string
     }
+
+    memBuilder struct {
+        httpPort int
+    }
+
+    CfgBuilder interface {
+        UseHTTPPort(int) CfgBuilder
+        Build() pbgServer.IConfiguration
+    }
 )
 
-func NewConfig(httpPort int) *MemConfiguration {
-    return &MemConfiguration{
-        httpPort:  httpPort,
-        lstAndSrv: ":" + string(httpPort),
+func ConfigBuilder() CfgBuilder {
+    return &memBuilder{}
+}
+
+func (builder *memBuilder) UseHTTPPort(port int) CfgBuilder {
+    builder.httpPort = port
+    return builder
+}
+
+func (builder *memBuilder) Build() pbgServer.IConfiguration {
+    return &memConfiguration{
+        httpPort:  builder.httpPort,
+        lstAndSrv: fmt.Sprintf(":%d", builder.httpPort),
     }
 }
 
-func (cfg *MemConfiguration) GetHTTPPort() int {
+func (cfg *memConfiguration) GetHTTPPort() int {
     return cfg.httpPort
 }
 
-func (cfg *MemConfiguration) GetListenAndServe() string {
+func (cfg *memConfiguration) GetListenAndServe() string {
     return cfg.lstAndSrv
 }

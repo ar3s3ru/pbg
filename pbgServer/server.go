@@ -36,7 +36,7 @@ type(
 
         CheckInitialization() error
         StartServer()
-        Handle(HTTPMethod, string, Handler)
+        Handle(HTTPMethod, string, Handler) PBGServer
     }
 
     PBGBuilder interface {

@@ -1,16 +1,17 @@
 package main
 
 import (
-    "github.com/ar3s3ru/PokemonBattleGo/pbgServer"
     "fmt"
     "github.com/valyala/fasthttp"
     "github.com/buaazp/fasthttprouter"
-    pbgMem "github.com/ar3s3ru/PokemonBattleGo/pbgServer/mem"
+    "github.com/ar3s3ru/PokemonBattleGo/pbgServer"
+    "github.com/ar3s3ru/PokemonBattleGo/pbgServer/mem"
 )
 
-func main() {
-    srv := pbgServer.Builder().UseConfiguration(
-        pbgMem.NewConfig(8080),
+func getServer() pbgServer.PBGServer {
+    return pbgServer.Builder().UseConfiguration(
+        // Configuration from mem package
+        mem.ConfigBuilder().UseHTTPPort(8080).Build(),
     ).UseDataMechanism(func(cfg pbgServer.IConfiguration) pbgServer.IDataMechanism {
         fmt.Printf("Building Data Mechanism using %v\n", cfg)
         return nil
@@ -21,12 +22,15 @@ func main() {
         fmt.Printf("Building Sess Mechanism using %v\n", cfg)
         return nil
     }).Build()
+}
 
+func main() {
+    // Get server instance
+    srv := getServer()
+    // Handle HTTP request
     srv.Handle(pbgServer.GET, "/hello", func(sctx pbgServer.IServerContext,
                                              ctx *fasthttp.RequestCtx,
                                              pm fasthttprouter.Params) {
         fmt.Fprintf(ctx, "Called \"/hello\" with %v\n", sctx)
-    })
-
-    srv.StartServer()
+    }).StartServer()    // Start HTTP server
 }
