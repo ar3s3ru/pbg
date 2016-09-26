@@ -4,6 +4,7 @@ import (
     "github.com/valyala/fasthttp"
     "github.com/buaazp/fasthttprouter"
     "log"
+    "fmt"
 )
 
 type(
@@ -13,12 +14,12 @@ type(
         authMechanism IAuthMechanism
         sessMechanism ISessionsMechanism
         // Private fields
-        configuration IConfiguration
+        configuration Configuration
         httpRouter    *fasthttprouter.Router
     }
 
     pbgBuilder struct {
-        config     IConfiguration
+        config     Configuration
         dmCallback DMConstructor
         amCallback AMConstructor
         smCallback SMConstructor
@@ -32,7 +33,7 @@ type(
 
     PBGServer interface {
         IServerContext
-        GetConfiguration() IConfiguration
+        GetConfiguration() Configuration
 
         CheckInitialization() error
         StartServer()
@@ -40,7 +41,7 @@ type(
     }
 
     PBGBuilder interface {
-        UseConfiguration(IConfiguration) PBGBuilder
+        UseConfiguration(Configuration)  PBGBuilder
         UseDataMechanism(DMConstructor)  PBGBuilder
         UseAuthMechanism(AMConstructor)  PBGBuilder
         UseSessMechanism(SMConstructor)  PBGBuilder
@@ -51,9 +52,9 @@ type(
     // Costruttori callback: vogliamo costruire (in maniera
     // decisa dall'utente) i meccanismi di accesso alla memoria
     // in base alla particolare configurazione passata al builder
-    DMConstructor func(cfg IConfiguration) IDataMechanism
-    AMConstructor func(cfg IConfiguration) IAuthMechanism
-    SMConstructor func(cfg IConfiguration) ISessionsMechanism
+    DMConstructor func(cfg Configuration) IDataMechanism
+    AMConstructor func(cfg Configuration) IAuthMechanism
+    SMConstructor func(cfg Configuration) ISessionsMechanism
 )
 
 // Builder methods ------------------------------------------------------------- //
@@ -62,7 +63,7 @@ func Builder() PBGBuilder {
     return &pbgBuilder{}
 }
 
-func (builder *pbgBuilder) UseConfiguration(cfg IConfiguration) PBGBuilder {
+func (builder *pbgBuilder) UseConfiguration(cfg Configuration) PBGBuilder {
     if cfg == nil {
         panic("Using nil as configuration is not allowed!")
     } else {
@@ -134,13 +135,17 @@ func (builder *pbgBuilder) Build() PBGServer {
 // Server methods -------------------------------------------------------------- //
 // ----------------------------------------------------------------------------- //
 func (srv *pbgServer) StartServer() {
-    log.Fatal(fasthttp.ListenAndServe(
-        srv.configuration.GetListenAndServe(),
-        srv.httpRouter.Handler,
-    ))
+    if port := srv.configuration.GetHTTPPort(); port != -1 {
+        log.Fatal(fasthttp.ListenAndServe(
+            fmt.Sprintf(":%d", port),
+            srv.httpRouter.Handler,
+        ))
+    } else {
+        panic(ErrHTTPPortNotSet)
+    }
 }
 
-func (srv *pbgServer) GetConfiguration() IConfiguration {
+func (srv *pbgServer) GetConfiguration() Configuration {
     return srv.configuration
 }
 

@@ -10,7 +10,7 @@ import (
 
 type (
     memData struct {
-        pokèmons   map[bson.ObjectId]pbgServer.Pokèmon
+        pokèmons   []pbgServer.Pokèmon
         trainers   map[bson.ObjectId]pbgServer.Trainer
         // NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!
         // EXTREME BOTTLENECK HERE!
@@ -57,7 +57,7 @@ func (builder *memDataBuilder) Build() pbgServer.IDataMechanism {
     }
 
     return &memData{
-        pokèmons: make(map[bson.ObjectId]pbgServer.Pokèmon),
+        pokèmons: *(new([]pbgServer.Pokèmon)),
         trainers: make(map[bson.ObjectId]pbgServer.Trainer),
     }
 }
@@ -87,11 +87,11 @@ func (data *memData) RemoveTrainer(id bson.ObjectId) error {
     }
 }
 
-func (data *memData) GetPokèmonById(id bson.ObjectId) (pbgServer.Pokèmon, error) {
-    if pokèmon := data.pokèmons[id]; pokèmon == nil {
+func (data *memData) GetPokèmonById(id int) (pbgServer.Pokèmon, error) {
+    if id <= 0 || id >= len(data.pokèmons) {
         return nil, ErrPokèmonNotFound
     } else {
-        return pokèmon, nil
+        return data.pokèmons[(id - 1)], nil
     }
 }
 
