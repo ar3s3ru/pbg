@@ -18,10 +18,9 @@ func handleHello(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fas
 
 func dmCallback(cfg pbgServer.Configuration) pbgServer.IDataMechanism {
     if pokèmonFile, err := cfg.GetValue(CfgPokèmonFile); err != nil {
-        return mem.NewDataBuilder().UsePokèmonFile(pokèmonFile.(string)).Build()
-    } else {
-        fmt.Printf("err val: %v", err)
         panic(err)
+    } else {
+        return mem.NewDataBuilder().UsePokèmonFile(pokèmonFile.(string)).Build()
     }
 }
 
