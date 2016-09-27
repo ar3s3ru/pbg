@@ -24,14 +24,14 @@ func dmCallback(cfg pbgServer.Configuration) pbgServer.IDataMechanism {
     }
 }
 
-func amCallback(cfg pbgServer.Configuration) pbgServer.IAuthMechanism {
-    fmt.Printf("Building Auth Mechanism using %v\n", cfg)
-    return nil
+func smCallback(cfg pbgServer.Configuration, dm pbgServer.IDataMechanism) pbgServer.ISessionMechanism {
+    fmt.Printf("Using dataMechanism: %v\n", dm)
+    return mem.AuthBuilder().UseDataMechanism(dm).Build()
 }
 
-func smCallback(cfg pbgServer.Configuration) pbgServer.ISessionsMechanism {
-    fmt.Printf("Building Sess Mechanism using %v\n", cfg)
-    return nil
+func amCallback(cfg pbgServer.Configuration, sm pbgServer.ISessionMechanism) pbgServer.IAuthMechanism {
+    fmt.Printf("Using sessMechanism: %v\n", sm)
+    return sm.(mem.IAuthority)
 }
 
 func getServer() pbgServer.PBGServer {

@@ -9,6 +9,13 @@ import (
 )
 
 type (
+    DataBuilder interface {
+        UsePokèmonFile(path string)  DataBuilder
+        UseTrainersFile(path string) DataBuilder
+
+        Build() pbgServer.IDataMechanism
+    }
+
     memData struct {
         pokèmons   []pbgServer.Pokèmon
         trainers   map[bson.ObjectId]pbgServer.Trainer
@@ -20,13 +27,6 @@ type (
     memDataBuilder struct {
         pokèmonFile  string
         trainersFile string
-    }
-
-    DataBuilder interface {
-        UsePokèmonFile(path string)  DataBuilder
-        UseTrainersFile(path string) DataBuilder
-
-        Build() pbgServer.IDataMechanism
     }
 )
 

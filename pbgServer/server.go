@@ -12,7 +12,7 @@ type(
         // Mechanisms
         dataMechanism IDataMechanism
         authMechanism IAuthMechanism
-        sessMechanism ISessionsMechanism
+        sessMechanism ISessionMechanism
         // Private fields
         configuration Configuration
         httpRouter    *fasthttprouter.Router
@@ -28,7 +28,7 @@ type(
     IServerContext interface {
         GetDataMechanism() IDataMechanism
         GetAuthMechanism() IAuthMechanism
-        GetSessMechanism() ISessionsMechanism
+        GetSessMechanism() ISessionMechanism
     }
 
     PBGServer interface {
@@ -52,9 +52,9 @@ type(
     // Costruttori callback: vogliamo costruire (in maniera
     // decisa dall'utente) i meccanismi di accesso alla memoria
     // in base alla particolare configurazione passata al builder
-    DMConstructor func(cfg Configuration) IDataMechanism
-    AMConstructor func(cfg Configuration) IAuthMechanism
-    SMConstructor func(cfg Configuration) ISessionsMechanism
+    DMConstructor func(Configuration)                     IDataMechanism
+    SMConstructor func(Configuration, IDataMechanism) ISessionMechanism
+    AMConstructor func(Configuration, ISessionMechanism) IAuthMechanism
 )
 
 // Builder methods ------------------------------------------------------------- //
@@ -108,18 +108,23 @@ func (builder *pbgBuilder) Build() PBGServer {
         panic("Configuration not set")
     }
 
-    dataMechanism := builder.dmCallback(builder.config)
-    authMechanism := builder.amCallback(builder.config)
-    sessMechanism := builder.smCallback(builder.config)
+    var (
+        dataMechanism IDataMechanism
+        sessMechanism ISessionMechanism
+        authMechanism IAuthMechanism
+    )
 
-    //switch {
-    //case dataMechanism == nil:
-    //    panic("DataMechanism not created in dedicated callback")
-    //case authMechanism == nil:
-    //    panic("AuthMechanism not created in dedicated callback")
-    //case sessMechanism == nil:
-    //    panic("SessMechanism not created in dedicated callback")
-    //}
+    if dataMechanism = builder.dmCallback(builder.config); dataMechanism == nil {
+        panic("DataMechanism not created in dedicated callback")
+    }
+
+    if sessMechanism = builder.smCallback(builder.config, dataMechanism); sessMechanism == nil {
+        panic("SessMechanism not created in dedicated callback")
+    }
+
+    if authMechanism = builder.amCallback(builder.config, sessMechanism); authMechanism == nil {
+        panic("AuthMechanism not created in dedicated callback")
+    }
 
     return &pbgServer{
         dataMechanism: dataMechanism,
@@ -157,7 +162,7 @@ func (srv *pbgServer) GetAuthMechanism() IAuthMechanism {
     return srv.authMechanism
 }
 
-func (srv *pbgServer) GetSessMechanism() ISessionsMechanism {
+func (srv *pbgServer) GetSessMechanism() ISessionMechanism {
     return srv.sessMechanism
 }
 

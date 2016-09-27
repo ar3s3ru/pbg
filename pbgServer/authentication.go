@@ -3,8 +3,15 @@ package pbgServer
 import "time"
 
 type (
+    // TODO: add error handling?
     IAuthMechanism interface {
-        // TODO
+        DoLogin(string, string) Session
+        DoLogout(Session)
+    }
+
+    IAuthBuilder interface {
+        UseSessionMechanism(ISessionMechanism) IAuthBuilder
+        Build() IAuthMechanism
     }
 
     User interface {
