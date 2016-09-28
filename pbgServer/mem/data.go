@@ -6,6 +6,9 @@ import (
     "errors"
     "gopkg.in/mgo.v2/bson"
     "time"
+    "encoding/json"
+    "io/ioutil"
+    "fmt"
 )
 
 type (
@@ -17,8 +20,8 @@ type (
     }
 
     memData struct {
-        pokèmons   []pbgServer.Pokèmon
-        trainers   map[bson.ObjectId]pbgServer.Trainer
+        pokèdx   *pokèdex
+        trainers map[bson.ObjectId]pbgServer.Trainer
         // NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!
         // EXTREME BOTTLENECK HERE!
         trainMutex sync.Mutex
@@ -56,8 +59,22 @@ func (builder *memDataBuilder) Build() pbgServer.IDataMechanism {
         panic("Using \"\" as Pokèmon file is not allowed")
     }
 
+    var pkms pokèdex
+    fmt.Printf("Reading file %s...\n", builder.pokèmonFile)
+
+    // TODO: pokèmon file unmarshalling
+    if file, err := ioutil.ReadFile(builder.pokèmonFile); err != nil {
+        panic(err)
+    } else {
+        pkms = pokèdex{}
+        if err := json.Unmarshal(file, &pkms); err != nil {
+            panic(err)
+        }
+    }
+
+    fmt.Printf("File read successfully - created Pokèdex %v\n", pkms)
     return &memData{
-        pokèmons: *(new([]pbgServer.Pokèmon)),
+        pokèdx:   &pkms,
         trainers: make(map[bson.ObjectId]pbgServer.Trainer),
     }
 }
@@ -88,10 +105,10 @@ func (data *memData) RemoveTrainer(id bson.ObjectId) error {
 }
 
 func (data *memData) GetPokèmonById(id int) (pbgServer.Pokèmon, error) {
-    if id <= 0 || id >= len(data.pokèmons) {
+    if id <= 0 || id > len(data.pokèdx.List) {
         return nil, ErrPokèmonNotFound
     } else {
-        return data.pokèmons[(id - 1)], nil
+        return &data.pokèdx.List[(id - 1)], nil
     }
 }
 

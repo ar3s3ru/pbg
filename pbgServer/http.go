@@ -3,6 +3,7 @@ package pbgServer
 import (
     "github.com/valyala/fasthttp"
     "github.com/buaazp/fasthttprouter"
+    "fmt"
 )
 
 type (
@@ -24,6 +25,7 @@ func (srv *pbgServer) Handle(method HTTPMethod, path string, handler Handler) PB
             // New handle server-specific
             handler(srv, ctx, ps)
         })
+        fmt.Printf("Handler registered at: %s, method: %v\n", path, method)
     }
     // Method chaining
     return srv

@@ -9,13 +9,16 @@ type (
     }
 
     Move interface {
-        GetName() string
-        GetType() MoveType
+        GetName()      string
+        GetType() Type
+        GetCategory()  bool
+        GetDamage()    int
+        GetPrecision() int
     }
 
     Trainer interface {
         User
-        GetType() TrainerType
+        GetType() TrainerClass
         GetTeam() [6]PokèmonTeam
     }
 
@@ -44,7 +47,64 @@ type (
         // TODO
     }
 
-    MoveType    int
-    TrainerType int
-    PokèmonType [2]MoveType
+    Category     int
+    Type         int
+    TrainerClass int
+    PokèmonType  [2]Type
+)
+
+const (
+    Physique Category = iota
+    Special
+    State
+
+    Normal Type = iota
+    Fire
+    Fightning
+    Water
+    Flying
+    Grass
+    Poison
+    Electric
+    Ground
+    PsychicT
+    Rock
+    Ice
+    Bug
+    Dragon
+    Ghost
+    Dark
+    Steel
+    Fairy
+    Undefined
+
+    TrainerC TrainerClass = iota
+    Beauty
+    Biker
+    BirdKeeper
+    Blackbelt
+    BugCatcher
+    Burglar
+    Channeler
+    Cooltrainer
+    CueBall
+    Engineer
+    Fisherman
+    Gambler
+    Gentleman
+    Hiker
+    JrTrainer
+    Juggler
+    Lass
+    PokèManiac
+    PsychicC
+    Rocker
+    Rocket
+    Sailor
+    Scientist
+    SuperNerd
+    Swimmer
+    Tamer
+    Youngster
+    Chief
 )
