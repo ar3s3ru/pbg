@@ -26,11 +26,13 @@ type(
         smCallback SMConstructor
     }
 
-    // *IT:* Interfaccia che espone le funzionalità riguardo la gestione dei dati internamente al server.
+    // # IT
+    // Interfaccia che espone le funzionalità riguardo la gestione dei dati internamente al server.
     // Permette dunque l'accesso ad eventuale database e meccanismo di autenticazione all'interno
     // delle callback registrate dal server per gestire le varie richieste HTTP.
     //
-    // *EN:* Interface that expose functionalities regarding server internal data managing.
+    // # EN
+    // Interface that expose functionalities regarding server internal data managing.
     // In other words, it allows database and authentication mechanisms access inside the callbacks
     // registered to handle all the HTTP requests.
     IServerContext interface {
