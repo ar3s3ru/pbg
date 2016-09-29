@@ -60,7 +60,9 @@ const (
     Physique Category = iota
     Special
     State
+)
 
+const (
     Normal Type = iota
     Fire
     Fightning
@@ -80,7 +82,9 @@ const (
     Steel
     Fairy
     Undefined
+)
 
+const (
     TrainerC TrainerClass = iota
     Beauty
     Biker
@@ -112,136 +116,50 @@ const (
     Chief
 )
 
+var (
+    CategoryNames = [...]string {
+        "Physique", "Special", "State",
+    }
+    TypeNames     = [...]string {
+        "Normal", "Fire", "Fightning", "Water", "Flying", "Grass", "Poison", "Electric", "Ground", "Psychic", "Rock",
+        "Ice", "Bug", "Dragon", "Ghost", "Dark", "Steel", "Fairy", "???",
+    }
+    ClassesNames  = [...]string {
+        "Trainer", "Beauty", "Biker", "BirdKeeper", "Blackbelt", "Bug Catcher", "Burglar", "Channeler", "Cooltrainer",
+        "Cue Ball", "Engineer", "Fisherman", "Gambler", "Gentleman", "Hiker", "Trainer Jr.", "Juggler", "Lass",
+        "PokèManiac", "Psychic", "Rocker", "Rocket", "Sailor", "Scientist", "Super Nerd", "Swimmer", "Tamer",
+        "Youngster", "Chief",
+    }
+)
+
 func (c Category) String() string {
-    switch c {
-    case Physique:
-        return "Physique"
-    case Special:
-        return "Special"
-    case State:
-        return "State"
-    default:
+    if c == Physique || c == Special || c == State {
+        return CategoryNames[c]
+    } else {
         return "Undefined"
     }
 }
 
 func (t Type) String() string {
-    switch t {
-    case Normal:
-        return "Normal"
-    case Fire:
-        return "Fire"
-    case Fightning:
-        return "Fightning"
-    case Water:
-        return "Water"
-    case Flying:
-        return "Flying"
-    case Grass:
-        return "Grass"
-    case Poison:
-        return "Poison"
-    case Electric:
-        return "Electric"
-    case Ground:
-        return "Ground"
-    case PsychicT:
-        return "Psychic"
-    case Rock:
-        return "Rock"
-    case Ice:
-        return "Ice"
-    case Bug:
-        return "Bug"
-    case Dragon:
-        return "Dragon"
-    case Ghost:
-        return "Ghost"
-    case Dark:
-        return "Dark"
-    case Steel:
-        return "Steel"
-    case Fairy:
-        return "Fairy"
-    case Undefined:
-        return "???"
-    default:
+    if t >= Normal && t <= Undefined {
+        return TypeNames[t]
+    } else {
         return "Undefined"
     }
 }
 
 func (tc TrainerClass) String() string {
-    switch tc {
-    case TrainerC:
-        return "Trainer"
-    case Beauty:
-        return "Beauty"
-    case Biker:
-        return "Biker"
-    case BirdKeeper:
-        return "Bird Keeper"
-    case Blackbelt:
-        return "Blackbelt"
-    case BugCatcher:
-        return "Bug Catcher"
-    case Burglar:
-        return "Burglar"
-    case Channeler:
-        return "Channeler"
-    case Cooltrainer:
-        return "Cooltrainer"
-    case CueBall:
-        return "Cue Ball"
-    case Engineer:
-        return "Engineer"
-    case Fisherman:
-        return "Fisherman"
-    case Gambler:
-        return "Gambler"
-    case Gentleman:
-        return "Gentleman"
-    case Hiker:
-        return "Hiker"
-    case JrTrainer:
-        return "Trainer Jr."
-    case Juggler:
-        return "Juggler"
-    case Lass:
-        return "Lass"
-    case PokèManiac:
-        return "PokèManiac"
-    case PsychicC:
-        return "Psychic"
-    case Rocker:
-        return "Rocker"
-    case Rocket:
-        return "Team Rocket"
-    case Sailor:
-        return "Sailor"
-    case Scientist:
-        return "Scientist"
-    case SuperNerd:
-        return "Super Nerd"
-    case Swimmer:
-        return "Swimmer"
-    case Tamer:
-        return "Tamer"
-    case Youngster:
-        return "Youngster"
-    case Chief:
-        return "Chief"
-    default:
+    if tc >= TrainerC && tc <= Chief {
+        return ClassesNames[tc]
+    } else {
         return "Undefined"
     }
 }
 
 func (pt PokèmonType) String() string {
-    //if fType >= Normal && fType <= Undefined {
-    //    str += fType.String()
-    //}
-    //
-    //if sType >= Normal && sType <= Undefined {
-    //    str += "/" + sType.String()
-    //}
-    return fmt.Sprintf("%s/%s", pt[0].String(), pt[1].String())
+    if pt[1] == -1 {
+        return pt[0].String()
+    } else {
+        return fmt.Sprintf("%s/%s", pt[0].String(), pt[1].String())
+    }
 }

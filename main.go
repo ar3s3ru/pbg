@@ -26,8 +26,8 @@ func handlePokèmon(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm 
         fmt.Fprintf(ctx, "Error occurred: %s", err)
     } else {
         fmt.Fprintf(ctx, "Pokèmon: %s\n", pkm.GetName())
-        fmt.Fprintf(ctx, "    Type: %s\n", pkm.GetType().String())
-        fmt.Fprintf(ctx, "    Number: %d\n", pkm.GetPokèdex())
+        fmt.Fprintf(ctx, "    Type:       %s\n", pkm.GetType().String())
+        fmt.Fprintf(ctx, "    Number:     %d\n", pkm.GetPokèdex())
         fmt.Fprintf(ctx, "    Base Stats: %v\n", pkm.GetBaseStats())
     }
 }
@@ -52,7 +52,7 @@ func amCallback(cfg pbgServer.Configuration, sm pbgServer.ISessionMechanism) pbg
 
 func getServer() pbgServer.PBGServer {
     return pbgServer.Builder().UseConfiguration(
-        pbgServer.NewConfig().SetHTTPPort(8080).SetValue(CfgPokèmonFile, "pokedexTest.json"),
+        pbgServer.NewConfig().SetHTTPPort(8080).SetValue(CfgPokèmonFile, "pokedb.json"),
     ).UseDataMechanism(dmCallback).UseAuthMechanism(amCallback).UseSessMechanism(smCallback).Build()
 }
 
