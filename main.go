@@ -6,6 +6,7 @@ import (
     "github.com/buaazp/fasthttprouter"
     "github.com/ar3s3ru/PokemonBattleGo/pbgServer"
     "github.com/ar3s3ru/PokemonBattleGo/pbgServer/mem"
+    "strconv"
 )
 
 const (
@@ -17,20 +18,17 @@ func handleHello(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fas
 }
 
 func handlePokèmon(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
-    id := pm.ByName("id")
-    if id != "" {
+    if id := pm.ByName("id"); id == "" {
         fmt.Fprintln(ctx, "Invalid id used")
+    } else if idx, err := strconv.Atoi(id); err != nil {
+        fmt.Fprintf(ctx, "Error: %v", err)
+    } else if pkm, err := sctx.GetDataMechanism().GetPokèmonById(idx); err != nil {
+        fmt.Fprintf(ctx, "Error occurred: %s", err)
     } else {
-        //idx, _ := strconv.Atoi(id)
-        idx := 1
-        if pkm, err := sctx.GetDataMechanism().GetPokèmonById(idx); err != nil {
-            fmt.Fprintf(ctx, "Error occurred: %s", err)
-        } else {
-            fmt.Fprintf(ctx, "Pokèmon: %s\n", pkm.GetName())
-            fmt.Fprintf(ctx, "\tType: %v\n", pkm.GetType())
-            fmt.Fprintf(ctx, "\tNumber: %d\n", pkm.GetPokèdex())
-            fmt.Fprintf(ctx, "\tBase Stats: %v\n", pkm.GetBaseStats())
-        }
+        fmt.Fprintf(ctx, "Pokèmon: %s\n", pkm.GetName())
+        fmt.Fprintf(ctx, "\tType: %v\n", pkm.GetType())
+        fmt.Fprintf(ctx, "\tNumber: %d\n", pkm.GetPokèdex())
+        fmt.Fprintf(ctx, "\tBase Stats: %v\n", pkm.GetBaseStats())
     }
 }
 
@@ -63,6 +61,6 @@ func main() {
     srv := getServer()
     // Handle HTTP request
     srv.Handle(
-        pbgServer.GET, "/pokemon", handlePokèmon,
+        pbgServer.GET, "/pokemon/:id", handlePokèmon,
     ).StartServer() // Start HTTP server
 }

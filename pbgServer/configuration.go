@@ -4,7 +4,7 @@ import "errors"
 
 type (
     Configuration interface {
-        GetValue(string)               (interface{}, error)
+        GetValue(string)              (interface{}, error)
         SetValue(string, interface{}) Configuration
 
         // Needed from server for StartServer()

@@ -10,10 +10,11 @@ type (
 
     Move interface {
         GetName()      string
-        GetType() Type
-        GetCategory()  bool
+        GetType()      Type
+        GetCategory()  Category
         GetDamage()    int
         GetPrecision() int
+        GetPPs()       int
     }
 
     Trainer interface {

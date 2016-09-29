@@ -60,7 +60,6 @@ func (builder *memDataBuilder) Build() pbgServer.IDataMechanism {
     }
 
     var pkms pokèdex
-    fmt.Printf("Reading file %s...\n", builder.pokèmonFile)
 
     // TODO: pokèmon file unmarshalling
     if file, err := ioutil.ReadFile(builder.pokèmonFile); err != nil {
@@ -72,7 +71,6 @@ func (builder *memDataBuilder) Build() pbgServer.IDataMechanism {
         }
     }
 
-    fmt.Printf("File read successfully - created Pokèdex %v\n", pkms)
     return &memData{
         pokèdx:   &pkms,
         trainers: make(map[bson.ObjectId]pbgServer.Trainer),
