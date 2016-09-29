@@ -9,27 +9,28 @@ import (
 
 type(
     pbgServer struct {
-        // Mechanisms
+        // Mechanisms ----------------------
         dataMechanism IDataMechanism
         authMechanism IAuthMechanism
         sessMechanism ISessionMechanism
-        // Private fields
+        // Private fields ------------------
         configuration Configuration
         httpRouter    *fasthttprouter.Router
     }
 
     pbgBuilder struct {
         config     Configuration
+        // Callbacks -----------
         dmCallback DMConstructor
         amCallback AMConstructor
         smCallback SMConstructor
     }
 
-    // Interfaccia che espone le funzionalità riguardo la gestione dei dati internamente al server.
+    // *IT:* Interfaccia che espone le funzionalità riguardo la gestione dei dati internamente al server.
     // Permette dunque l'accesso ad eventuale database e meccanismo di autenticazione all'interno
     // delle callback registrate dal server per gestire le varie richieste HTTP.
     //
-    // Interface that expose functionalities regarding server internal data managing.
+    // *EN:* Interface that expose functionalities regarding server internal data managing.
     // In other words, it allows database and authentication mechanisms access inside the callbacks
     // registered to handle all the HTTP requests.
     IServerContext interface {
@@ -38,12 +39,12 @@ type(
         GetSessMechanism() ISessionMechanism
     }
 
-    // Rappresenta l'oggetto Server col quale l'utente interagisce.
+    // *IT:* Rappresenta l'oggetto Server col quale l'utente interagisce.
     // Ha una relazione di composizione con IServerContext; inoltre, espone la configurazione
     // correntemente usata, la registrazione di handler per la gestione di richieste HTTP, e la messa in ascolto
     // di tali richieste sulla porta specificata nella particolare configurazione del server.
     //
-    // Represents the Server object the user interacts with.
+    // *EN:* Represents the Server object the user interacts with.
     // It has a composition relationship with IServerContext; moreover, it exposes the actual used configuration,
     // handlers registration for HTTP requests, and a ListenAndServe() method to start listening for HTTP request onto
     // the particular port specified into the configuration actually used.

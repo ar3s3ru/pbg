@@ -8,7 +8,6 @@ import (
     "time"
     "encoding/json"
     "io/ioutil"
-    "fmt"
 )
 
 type (

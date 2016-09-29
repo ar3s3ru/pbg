@@ -26,9 +26,9 @@ func handlePokèmon(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm 
         fmt.Fprintf(ctx, "Error occurred: %s", err)
     } else {
         fmt.Fprintf(ctx, "Pokèmon: %s\n", pkm.GetName())
-        fmt.Fprintf(ctx, "\tType: %v\n", pkm.GetType())
-        fmt.Fprintf(ctx, "\tNumber: %d\n", pkm.GetPokèdex())
-        fmt.Fprintf(ctx, "\tBase Stats: %v\n", pkm.GetBaseStats())
+        fmt.Fprintf(ctx, "    Type: %s\n", pkm.GetType().String())
+        fmt.Fprintf(ctx, "    Number: %d\n", pkm.GetPokèdex())
+        fmt.Fprintf(ctx, "    Base Stats: %v\n", pkm.GetBaseStats())
     }
 }
 
