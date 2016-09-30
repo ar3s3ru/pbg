@@ -33,6 +33,14 @@ def adding_base_stats(pkorigin, pkdest):
         j = j + 1
 
 
+def adding_sprites(i: int, pkdest):
+    pkdest["sprites"] = {
+        # Works with hotlinking
+        "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + str(i) + ".png",
+        "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/" + str(i) + ".png"
+    }
+
+
 def download_pokèmon(num: int):
     pokes = {
         "generation": 1,
@@ -56,6 +64,9 @@ def download_pokèmon(num: int):
         # Base statistics creation
         adding_base_stats(parsed_json, pkm)
 
+        # Sprites
+        adding_sprites(i, pkm)
+
         # Add pokemon into the dictionary
         pokes["pokemons"].insert(i, pkm)
         print("Donwloaded pokèmon " + str(i) + ": " + str(pkm))
@@ -67,7 +78,7 @@ def download_pokèmon(num: int):
 
 
 def main():
-    download_pokèmon(30)
+    download_pokèmon(10)
 
 
 if __name__ == '__main__':

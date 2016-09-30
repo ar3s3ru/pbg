@@ -3,13 +3,22 @@ package pbgServer
 import "fmt"
 
 type (
+    // Interfaccia che rappresenta un Pokèmon.
+    //
+    // Interface that represent a Pokèmon.
     Pokèmon interface {
         GetName()      string
         GetType()      PokèmonType
         GetPokèdex()   int
         GetBaseStats() [6]int
+        // Sprites
+        GetFrontSprite() string
+        GetBackSprite()  string
     }
 
+    // Interfaccia che rappresenta una mossa Pokèmon.
+    //
+    // Interfaces that represents a Pokèmon move.
     Move interface {
         GetName()      string
         GetType()      Type
@@ -19,12 +28,27 @@ type (
         GetPPs()       int
     }
 
+    // Interfaccia che rappresenta un Allenatore Pokèmon.
+    // L'ALlenatore è un modello dell'utente che interagisce col server - indi per cui ha una relazione di composizione
+    // con l'interfaccia Utente.
+    //
+    // Interfaces that represent a Pokèmon Trainer.
+    // The Trainer is a model for the user that interacts with the server - as such, it has a composition relationship
+    // with the User interface.
     Trainer interface {
         User
         GetType() TrainerClass
         GetTeam() [6]PokèmonTeam
     }
 
+    // Interfaccia che rappresenta un Pokèmon all'interno di una squadra.
+    // Ha una relazione di dipendenza con un oggetto Pokèmon, ma estende un Pokèmon base con possibile Nickname,
+    // un numero di mosse (da 1 a 4 possibili), un certo livello, una determinata Natura e Abilità, e un numero di IVs
+    // ed EVs.
+    //
+    // Interfaces that represent a Pokèmon inside a team.
+    // It has a dependency relationship with a Pokèmon object, but extends the latter with a possible Nickname,
+    // a certain number of moves (from 1 to 4), a certain level, a specified Nature and Ability, IVs and EVs.
     PokèmonTeam interface {
         GetNickname() string
         GetPokemon()  Pokèmon
@@ -40,19 +64,40 @@ type (
         GetEV()  int
     }
 
+    // Interfaccia che rappresenta una Natura.
+    //
+    // Interface that represent a Nature.
     Nature interface {
         GetName() string
         // TODO
     }
 
+    // Interfaccia che rappresenta un'Abilità.
+    //
+    // Interface that represent an Ability.
     Ability interface {
         GetName() string
         // TODO
     }
 
-    Category     int
-    Type         int
+    // Categoria di mossa Pokèmon.
+    //
+    // Pokèmon move Category.
+    Category int
+
+    // Tipo di mossa Pokèmon.
+    //
+    // Pokèmon move Type.
+    Type int
+
+    // Classe di un ALlenatore Pokèmon.
+    //
+    // Pokèmon Trainer Class.
     TrainerClass int
+
+    // Tipo di un Pokèmon; può avere fino a 2 tipi di mossa Pokèmon.
+    //
+    // Pokèmon Type; can have up to 2 Pokèmon move type.
     PokèmonType  [2]Type
 )
 
@@ -117,14 +162,19 @@ const (
 )
 
 var (
+    // Nomi per le varie categorie
     CategoryNames = [...]string {
         "Physique", "Special", "State",
     }
-    TypeNames     = [...]string {
+
+    // Nomi per i vari tipi
+    TypeNames = [...]string {
         "Normal", "Fire", "Fightning", "Water", "Flying", "Grass", "Poison", "Electric", "Ground", "Psychic", "Rock",
         "Ice", "Bug", "Dragon", "Ghost", "Dark", "Steel", "Fairy", "???",
     }
-    ClassesNames  = [...]string {
+
+    // Nomi per le varie classi di allenatori
+    ClassesNames = [...]string {
         "Trainer", "Beauty", "Biker", "BirdKeeper", "Blackbelt", "Bug Catcher", "Burglar", "Channeler", "Cooltrainer",
         "Cue Ball", "Engineer", "Fisherman", "Gambler", "Gentleman", "Hiker", "Trainer Jr.", "Juggler", "Lass",
         "PokèManiac", "Psychic", "Rocker", "Rocket", "Sailor", "Scientist", "Super Nerd", "Swimmer", "Tamer",

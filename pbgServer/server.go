@@ -50,12 +50,7 @@ type(
     // the particular port specified into the configuration actually used.
     PBGServer interface {
         IServerContext
-
-        // Inizia l'ascolto di richieste HTTP sulla porta specificata nella configurazione usata.
-        //
-        // Starts HTTP requests listening on the port specified into the configuration used.
         GetConfiguration() Configuration
-
         // HTTP methods
         Handle(HTTPMethod, string, Handler) PBGServer
         StartServer()
