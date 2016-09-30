@@ -33,7 +33,7 @@
                 <td>{{ .GetPokèdex }}</td>
                 <td>{{ printf "%v" .GetType }}</td>
                 <td>{{ printf "%v" .GetBaseStats }}</td>
-                <td><img src="{{ .GetFrontSprite }}" /></td>
+                <td><img src="{{ .GetFrontSprite }}" /><img src="{{ .GetBackSprite }}" /></td>
             </tr>
         </table>
 {{ end }}
