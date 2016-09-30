@@ -64,16 +64,39 @@ func (authority *memAuthority) AddSession(user pbgServer.User) string {
 }
 
 func (authority *memAuthority) GetSession(token string) pbgServer.Session {
-    // TODO: finish this
+    authority.sessionsMutex.Lock()
+    defer authority.sessionsMutex.Unlock()
+
+    for _, v := range authority.sessions {
+        if v.GetToken() == token {
+            return v
+        }
+    }
+
     return nil
 }
 
 func (authority *memAuthority) RemoveSession(token string) {
-    // TODO: finish this
+    authority.sessionsMutex.Lock()
+    defer authority.sessionsMutex.Unlock()
+
+    for k, v := range authority.sessions {
+        if v.GetToken() == token {
+            delete(authority.sessions, k)
+            return
+        }
+    }
 }
 
 func (authority *memAuthority) Purge() {
-    // TODO: finish this
+    authority.sessionsMutex.Lock()
+    defer authority.sessionsMutex.Unlock()
+
+    for k, v := range authority.sessions {
+        if v.IsExpired() {
+            delete(authority.sessions, k)
+        }
+    }
 }
 
 func (authority *memAuthority) DoLogin(username string, password string) pbgServer.Session {
@@ -81,6 +104,8 @@ func (authority *memAuthority) DoLogin(username string, password string) pbgServ
     return nil
 }
 
-func (authority *memAuthority) DoLogout(pbgServer.Session) {
-    // TODO: finish this
+func (authority *memAuthority) DoLogout(session pbgServer.Session) {
+    if session != nil {
+        authority.RemoveSession(session.GetToken())
+    }
 }

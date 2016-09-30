@@ -19,7 +19,20 @@ func handleHello(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fast
     fmt.Fprintf(ctx, "Called \"/hello\" with %v\n", sctx)
 }
 
-func handlePokèmon(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
+func handlePokèmons(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
+    if t, err := template.ParseFiles(
+        path.Join("templates", "layout.html"),
+        path.Join("templates", "pokemons.html"),
+    ); err != nil {
+        ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+    } else if err := t.Execute(ctx, sctx.GetDataMechanism().GetPokèmons()); err != nil {
+        ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+    } else {
+        ctx.SetContentType("text/html; charset=utf-8")
+    }
+}
+
+func handlePokèmonId(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
     // Contents
     if idx, err := strconv.Atoi(pm.ByName("id")); err != nil {
         ctx.Error("Invalid id used, must be an integer (ex. /pokemon/1, /pokemon/2, ...)", fasthttp.StatusBadRequest)
@@ -48,8 +61,8 @@ func handleStatic(_ pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fasth
 }
 
 func dmCallback(cfg pbgServer.Configuration) pbgServer.IDataMechanism {
-    if pokèmonFile, err := cfg.GetValue(CfgPokèmonFile); err != nil {
-        panic(err)
+    if pokèmonFile := cfg.GetValue(CfgPokèmonFile); pokèmonFile == nil {
+        panic("PokèmonFile not configured")
     } else {
         return mem.NewDataBuilder().UsePokèmonFile(pokèmonFile.(string)).Build()
     }
@@ -74,7 +87,9 @@ func main() {
     srv := getServer()
     // Handle HTTP request
     srv.Handle(
-        pbgServer.GET, "/pokemon/:id", handlePokèmon,
+        pbgServer.GET, "/pokemon", handlePokèmons,
+    ).Handle(
+        pbgServer.GET, "/pokemon/:id", handlePokèmonId,
     ).Handle(
         pbgServer.GET, "/hello", handleHello,
     ).Handle(

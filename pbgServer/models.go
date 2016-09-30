@@ -18,7 +18,7 @@ type (
 
     // Interfaccia che rappresenta una mossa Pokèmon.
     //
-    // Interfaces that represents a Pokèmon move.
+    // Interface that represents a Pokèmon move.
     Move interface {
         GetName()      string
         GetType()      Type
@@ -32,7 +32,7 @@ type (
     // L'ALlenatore è un modello dell'utente che interagisce col server - indi per cui ha una relazione di composizione
     // con l'interfaccia Utente.
     //
-    // Interfaces that represent a Pokèmon Trainer.
+    // Interface that represent a Pokèmon Trainer.
     // The Trainer is a model for the user that interacts with the server - as such, it has a composition relationship
     // with the User interface.
     Trainer interface {
@@ -46,7 +46,7 @@ type (
     // un numero di mosse (da 1 a 4 possibili), un certo livello, una determinata Natura e Abilità, e un numero di IVs
     // ed EVs.
     //
-    // Interfaces that represent a Pokèmon inside a team.
+    // Interface that represent a Pokèmon inside a team.
     // It has a dependency relationship with a Pokèmon object, but extends the latter with a possible Nickname,
     // a certain number of moves (from 1 to 4), a certain level, a specified Nature and Ability, IVs and EVs.
     PokèmonTeam interface {

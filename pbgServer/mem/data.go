@@ -19,7 +19,7 @@ type (
     }
 
     memData struct {
-        pokèdx   *pokèdex
+        pokèdx   []pbgServer.Pokèmon
         trainers map[bson.ObjectId]pbgServer.Trainer
         // NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!
         // EXTREME BOTTLENECK HERE!
@@ -43,6 +43,19 @@ func NewDataBuilder() DataBuilder {
     return &memDataBuilder{}
 }
 
+func convertLtoPL(pkdx *pokèdex) []pbgServer.Pokèmon {
+    if pkdx == nil {
+        panic("Must use a valid pokèdex value!")
+    }
+
+    list := make([]pbgServer.Pokèmon, len(pkdx.List), len(pkdx.List))
+    for i := range pkdx.List {
+        list[i] = pbgServer.Pokèmon(&pkdx.List[i])
+    }
+
+    return list
+}
+
 func (builder *memDataBuilder) UsePokèmonFile(path string) DataBuilder {
     builder.pokèmonFile = path
     return builder
@@ -56,23 +69,18 @@ func (builder *memDataBuilder) UseTrainersFile(path string) DataBuilder {
 func (builder *memDataBuilder) Build() pbgServer.IDataMechanism {
     if builder.pokèmonFile == "" {
         panic("Using \"\" as Pokèmon file is not allowed")
-    }
-
-    var pkms pokèdex
-
-    // TODO: pokèmon file unmarshalling
-    if file, err := ioutil.ReadFile(builder.pokèmonFile); err != nil {
+    } else if file, err := ioutil.ReadFile(builder.pokèmonFile); err != nil {
         panic(err)
     } else {
-        pkms = pokèdex{}
+        pkms := pokèdex{}
         if err := json.Unmarshal(file, &pkms); err != nil {
             panic(err)
         }
-    }
 
-    return &memData{
-        pokèdx:   &pkms,
-        trainers: make(map[bson.ObjectId]pbgServer.Trainer),
+        return &memData{
+            pokèdx:   convertLtoPL(&pkms),
+            trainers: make(map[bson.ObjectId]pbgServer.Trainer),
+        }
     }
 }
 
@@ -101,11 +109,15 @@ func (data *memData) RemoveTrainer(id bson.ObjectId) error {
     }
 }
 
+func (data *memData) GetPokèmons() []pbgServer.Pokèmon {
+    return data.pokèdx
+}
+
 func (data *memData) GetPokèmonById(id int) (pbgServer.Pokèmon, error) {
-    if id <= 0 || id > len(data.pokèdx.List) {
+    if id <= 0 || id > len(data.pokèdx) {
         return nil, ErrPokèmonNotFound
     } else {
-        return &data.pokèdx.List[(id - 1)], nil
+        return data.pokèdx[id - 1], nil
     }
 }
 
