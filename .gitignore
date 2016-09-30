@@ -1,2 +1,8 @@
 .idea/*
 PokemonBattleGo*
+
+# For now...
+*.json
+
+# Static files compressed
+*.fasthttp.gz
