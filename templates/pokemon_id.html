@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) ${year}, Danilo Cianfrone
+  ~ Copyright (c) 2016, Danilo Cianfrone
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,21 +15,25 @@
   -->
 {{ define "title" }}{{ .GetName }} (Pok&egrave;monBattleGo){{ end }}
 
+{{ define "metadata" }}
+        <link rel="stylesheet" href="/static/css/pbgStyle.css" />
+{{ end }}
+
 {{ define "content" }}
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Pok&egrave;dex</th>
-        <th>Type</th>
-        <th>Base stats</th>
-        <th>Sprite</th>
-    </tr>
-    <tr>
-        <td>{{ .GetName }}</td>
-        <td>{{ .GetPokèdex }}</td>
-        <td>{{ .GetType.String }}</td>
-        <td>{{ printf "%v" .GetBaseStats }}</td>
-        <td><img src="{{ .GetFrontSprite }}" /></td>
-    </tr>
-</table>
+        <table id="pokeTable">
+            <tr>
+                <th>Name</th>
+                <th>Pok&egrave;dex</th>
+                <th>Type</th>
+                <th>Base stats</th>
+                <th>Sprite</th>
+            </tr>
+            <tr>
+                <td>{{ .GetName }}</td>
+                <td>{{ .GetPokèdex }}</td>
+                <td>{{ printf "%v" .GetType }}</td>
+                <td>{{ printf "%v" .GetBaseStats }}</td>
+                <td><img src="{{ .GetFrontSprite }}" /></td>
+            </tr>
+        </table>
 {{ end }}

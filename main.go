@@ -20,6 +20,7 @@ func handleHello(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fast
 }
 
 func handlePokèmon(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
+    // Contents
     if idx, err := strconv.Atoi(pm.ByName("id")); err != nil {
         ctx.Error("Invalid id used, must be an integer (ex. /pokemon/1, /pokemon/2, ...)", fasthttp.StatusBadRequest)
     } else if pkm, err := sctx.GetDataMechanism().GetPokèmonById(idx); err != nil {
@@ -31,8 +32,13 @@ func handlePokèmon(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm 
         ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
     } else if err := t.Execute(ctx, pkm); err != nil {
         ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+    }
+
+    // Encoding
+    if ctx.Request.Header.HasAcceptEncoding("application/json") {
+        ctx.SetContentType("application/json; charset=utf-8")
     } else {
-        ctx.SetContentType("text/html")
+        ctx.SetContentType("text/html; charset=utf-8")
     }
 }
 
@@ -72,6 +78,6 @@ func main() {
     ).Handle(
         pbgServer.GET, "/hello", handleHello,
     ).Handle(
-        pbgServer.GET, "/static/:resource", handleStatic,
+        pbgServer.GET, "/static/*resource", handleStatic,
     ).StartServer() // Start HTTP server
 }
