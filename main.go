@@ -18,12 +18,10 @@ func handleHello(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fas
 }
 
 func handlePokèmon(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
-    if id := pm.ByName("id"); id == "" {
-        fmt.Fprintln(ctx, "Invalid id used")
-    } else if idx, err := strconv.Atoi(id); err != nil {
-        fmt.Fprintf(ctx, "Error: %v", err)
+    if idx, err := strconv.Atoi(pm.ByName("id")); err != nil {
+        ctx.Error("Invalid id used, must be an integer (ex. /pokemon/1, /pokemon/2, ...)", fasthttp.StatusBadRequest)
     } else if pkm, err := sctx.GetDataMechanism().GetPokèmonById(idx); err != nil {
-        fmt.Fprintf(ctx, "Error occurred: %s", err)
+        ctx.Error(err.Error(), fasthttp.StatusNotFound)
     } else {
         fmt.Fprintf(ctx, "Pokèmon: %s\n", pkm.GetName())
         fmt.Fprintf(ctx, "    Type:       %s\n", pkm.GetType().String())
@@ -62,5 +60,7 @@ func main() {
     // Handle HTTP request
     srv.Handle(
         pbgServer.GET, "/pokemon/:id", handlePokèmon,
+    ).Handle(
+        pbgServer.GET, "/hello", handleHello,
     ).StartServer() // Start HTTP server
 }

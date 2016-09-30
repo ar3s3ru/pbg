@@ -26,12 +26,12 @@ type(
         smCallback SMConstructor
     }
 
-    // # IT
+    // <b>IT</b>
     // Interfaccia che espone le funzionalità riguardo la gestione dei dati internamente al server.
     // Permette dunque l'accesso ad eventuale database e meccanismo di autenticazione all'interno
     // delle callback registrate dal server per gestire le varie richieste HTTP.
     //
-    // # EN
+    // <b>EN</b>
     // Interface that expose functionalities regarding server internal data managing.
     // In other words, it allows database and authentication mechanisms access inside the callbacks
     // registered to handle all the HTTP requests.
@@ -41,12 +41,12 @@ type(
         GetSessMechanism() ISessionMechanism
     }
 
-    // *IT:* Rappresenta l'oggetto Server col quale l'utente interagisce.
+    // <b>IT:</b> Rappresenta l'oggetto Server col quale l'utente interagisce.
     // Ha una relazione di composizione con IServerContext; inoltre, espone la configurazione
     // correntemente usata, la registrazione di handler per la gestione di richieste HTTP, e la messa in ascolto
     // di tali richieste sulla porta specificata nella particolare configurazione del server.
     //
-    // *EN:* Represents the Server object the user interacts with.
+    // <b>EN:</b> Represents the Server object the user interacts with.
     // It has a composition relationship with IServerContext; moreover, it exposes the actual used configuration,
     // handlers registration for HTTP requests, and a ListenAndServe() method to start listening for HTTP request onto
     // the particular port specified into the configuration actually used.
