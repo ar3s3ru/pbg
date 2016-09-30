@@ -1,63 +1,74 @@
 #!/usr/bin/env python
-#
+# ------------------------------------------------------------------
 # Script per fregare i dati da PokèAPI e renderli compatibili a PBG.
 # Si ringrazia il grande capo Gianni Modica per lo script!
-#
+# ------------------------------------------------------------------
 import requests
 import json
 
 typesTable = {
-            "normal": 0, "fire": 1, "fightning": 2, "water": 3, "flying": 4, "grass": 5,
-            "poison": 6, "electric": 7, "ground": 8, "psychic": 9, "rock": 10, "ice": 11,
-            "bug": 12, "dragon": 13, "ghost": 14, "dark": 15, "steel": 16, "fairy": 17, "???": 18
-        }
+    "normal": 0, "fire": 1, "fightning": 2, "water": 3, "flying": 4, "grass": 5,
+    "poison": 6, "electric": 7, "ground": 8, "psychic": 9, "rock": 10, "ice": 11,
+    "bug": 12, "dragon": 13, "ghost": 14, "dark": 15, "steel": 16, "fairy": 17, "???": 18
+}
 
-def typeToGType(typ: str):
+
+def type_to_gotype(typ: str):
     typ1 = typesTable[typ]
     return typ1 if typ1 is not None else -1
 
-def downloadPokèmon(num: int):
-	pokes = {}
-	pokes["generation"] = 1
-	pokes["count"]      = num
-	pokes["pokemons"]   = []
 
-	for i in range (1, num + 1):
-		r = requests.get('http://pokeapi.co/api/v2/pokemon/'+ str(i) + '/')
-		parsedJson = r.json()
+def adding_type(pkorigin, pkdest):
+    pkdest["type"].insert(0, type_to_gotype(((pkorigin["types"])[0])["type"]["name"]))
+    if len(pkorigin["types"]) > 1:
+        pkdest["type"].insert(1, type_to_gotype(((pkorigin["types"])[1])["type"]["name"]))
+    else:
+        pkdest["type"].insert(1, -1)
 
-		pkm = {}
 
-		pkm["name"]      = parsedJson["name"]
-		pkm["name"]      = pkm["name"].title()
+def adding_base_stats(pkorigin, pkdest):
+    j = 0
+    for st in pkorigin["stats"]:
+        pkdest["baseStats"].insert(j, st["base_stat"])
+        j = j + 1
 
-		pkm["pokedex"]   = parsedJson["id"]
-		pkm["baseStats"] = []
 
-		pkm["type"]      = []
-		pkm["type"].insert(0, typeToGType(((parsedJson["types"])[0])["type"]["name"]))
+def download_pokèmon(num: int):
+    pokes = {
+        "generation": 1,
+        "count": num,
+        "pokemons": []
+    }
 
-		if len(parsedJson["types"]) > 1:
-			pkm["type"].insert(1, typeToGType(((parsedJson["types"])[1])["type"]["name"]))
-		else:
-			pkm["type"].insert(1, -1)
+    for i in range(1, num + 1):
+        r = requests.get('http://pokeapi.co/api/v2/pokemon/' + str(i) + '/')
+        parsed_json = r.json()
+        pkm = {
+            "name": parsed_json["name"].title(),
+            "pokedex": parsed_json["id"],
+            "baseStats": [],
+            "type": []
+        }
 
-		j = 0
-		for st in parsedJson["stats"]:
-			pkm["baseStats"].insert(j, st["base_stat"])
-			j=j+1
+        # Type creation
+        adding_type(parsed_json, pkm)
 
-		pokes["pokemons"].insert(i, pkm)
-		print("Donwloaded pokèmon " + str(i) + ": " + str(pkm))
+        # Base statistics creation
+        adding_base_stats(parsed_json, pkm)
 
-	val = json.dumps(pokes, indent=4, sort_keys=True)
-	file = open("pokedb.json","w")
-	file.write(val + "\n")
-	file.close()
+        # Add pokemon into the dictionary
+        pokes["pokemons"].insert(i, pkm)
+        print("Donwloaded pokèmon " + str(i) + ": " + str(pkm))
+
+    # Write dictionary to the disk
+    with open("pokedb.json", "w") as file:
+        val = json.dumps(pokes, indent=2, sort_keys=True)
+        file.write(val + "\n")
 
 
 def main():
-	downloadPokèmon(20)
+    download_pokèmon(30)
+
 
 if __name__ == '__main__':
-	main()
+    main()
