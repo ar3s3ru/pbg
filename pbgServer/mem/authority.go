@@ -2,9 +2,10 @@ package mem
 
 import (
     "github.com/ar3s3ru/PokemonBattleGo/pbgServer"
-    "errors"
     "gopkg.in/mgo.v2/bson"
     "sync"
+    "golang.org/x/crypto/bcrypt"
+    "time"
 )
 
 type (
@@ -29,17 +30,13 @@ type (
     }
 )
 
-var (
-    ErrInvalidDataMechanism = errors.New("Invalid DataMechanism value used in AuthorityBuilder (nil)")
-)
-
 func AuthBuilder() AuthorityBuilder {
     return &authBuilder{}
 }
 
 func (builder *authBuilder) UseDataMechanism(dm pbgServer.IDataMechanism) AuthorityBuilder {
     if dm == nil {
-        panic(ErrInvalidDataMechanism)
+        panic(pbgServer.ErrInvalidDataMechanism)
     } else {
         builder.dataMechanism = dm
         return builder
@@ -48,7 +45,7 @@ func (builder *authBuilder) UseDataMechanism(dm pbgServer.IDataMechanism) Author
 
 func (builder *authBuilder) Build() IAuthority {
     if builder.dataMechanism == nil {
-        panic(ErrInvalidDataMechanism)
+        panic(pbgServer.ErrInvalidDataMechanism)
     } else {
         return &memAuthority{
             dataMechanism: builder.dataMechanism,
@@ -58,34 +55,36 @@ func (builder *authBuilder) Build() IAuthority {
     }
 }
 
-func (authority *memAuthority) AddSession(user pbgServer.User) string {
+func (authority *memAuthority) AddSession(user pbgServer.User) pbgServer.Session {
     // TODO: finish this
-    return string(bson.NewObjectId())
+    return nil
 }
 
-func (authority *memAuthority) GetSession(token string) pbgServer.Session {
+func (authority *memAuthority) GetSession(token string) (pbgServer.Session, error) {
     authority.sessionsMutex.Lock()
     defer authority.sessionsMutex.Unlock()
 
     for _, v := range authority.sessions {
         if v.GetToken() == token {
-            return v
+            return v, nil
         }
     }
 
-    return nil
+    return nil, pbgServer.ErrSessionNotFound
 }
 
-func (authority *memAuthority) RemoveSession(token string) {
+func (authority *memAuthority) RemoveSession(token string) error {
     authority.sessionsMutex.Lock()
     defer authority.sessionsMutex.Unlock()
 
     for k, v := range authority.sessions {
         if v.GetToken() == token {
             delete(authority.sessions, k)
-            return
+            return nil
         }
     }
+
+    return pbgServer.ErrSessionNotFound
 }
 
 func (authority *memAuthority) Purge() {
@@ -99,13 +98,53 @@ func (authority *memAuthority) Purge() {
     }
 }
 
-func (authority *memAuthority) DoLogin(username string, password string) pbgServer.Session {
-    // TODO: finish this
-    return nil
+func (authority *memAuthority) DoLogin(username string, password string) (pbgServer.Session, error) {
+    if usr, err := authority.dataMechanism.GetTrainerByName(username); err != nil {
+        return nil, err
+    } else if err := bcrypt.CompareHashAndPassword([]byte(usr.GetPasswordHash()), []byte(password)); err != nil {
+        return nil, err
+    } else {
+        return authority.AddSession(usr), nil
+    }
 }
 
-func (authority *memAuthority) DoLogout(session pbgServer.Session) {
+func (authority *memAuthority) DoLogout(session pbgServer.Session) error {
     if session != nil {
-        authority.RemoveSession(session.GetToken())
+        return authority.RemoveSession(session.GetToken())
     }
+
+    return pbgServer.ErrInvalidSessionObject
+}
+
+func (authority *memAuthority) Register(username string, password string) (pbgServer.User, bson.ObjectId, error) {
+    if _, err := authority.dataMechanism.GetTrainerByName(username); err == nil {
+        // Error, probably already exists
+        return nil, "", pbgServer.ErrUserAlreadyExists
+    } else if pwd, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost); err != nil {
+        // Problem with salting...
+        return nil, "", err
+    } else {
+        trainer := &trainer{
+            name: username,
+            hpwd: pwd,
+            sgup: time.Now(),
+            set:  false,
+            tm:   [...]pbgServer.PokèmonTeam{ nil, nil, nil, nil, nil, nil },
+            cls:  pbgServer.TrainerC,
+        }
+
+        if id, err := authority.dataMechanism.AddTrainer(trainer); err != nil {
+            return nil, "", err
+        } else {
+            return trainer, id, nil
+        }
+    }
+}
+
+func (authority *memAuthority) Unregister(session pbgServer.Session) error {
+    if session == nil {
+        return pbgServer.ErrInvalidSessionObject
+    }
+    // TODO: finish this
+    return nil
 }

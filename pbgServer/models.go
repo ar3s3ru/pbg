@@ -38,9 +38,9 @@ type (
     // with the User interface.
     Trainer interface {
         User
-        IsSet()   bool
-        GetType() TrainerClass
-        GetTeam() [6]PokèmonTeam
+        IsSet()    bool
+        GetClass() (TrainerClass, error)
+        GetTeam()  ([6]PokèmonTeam, error)
     }
 
     // Interfaccia che rappresenta un Pokèmon all'interno di una squadra.

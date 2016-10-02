@@ -184,6 +184,7 @@ func (builder *pbgBuilder) Build() PBGServer {
 // Starts HTTP requests listening on the port specified into the configuration used.
 func (srv *pbgServer) StartServer() {
     if port := srv.configuration.GetHTTPPort(); port != -1 {
+        log.Printf("Starting server on :%d\n", port)
         log.Fatal(fasthttp.ListenAndServe(
             fmt.Sprintf(":%d", port),
             srv.httpRouter.Handler,

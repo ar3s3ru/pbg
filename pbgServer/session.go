@@ -1,6 +1,9 @@
 package pbgServer
 
-import "time"
+import (
+    "time"
+    "errors"
+)
 
 type (
     // TODO: add error handling?
@@ -9,9 +12,9 @@ type (
     // Interface that handles user's sessions inside the server.
     ISessionMechanism interface {
         // Gestione sessioni
-        AddSession(user User)    string
-        GetSession(token string) Session
-        RemoveSession(token string)
+        AddSession(user User)       Session
+        GetSession(token string)    (Session, error)
+        RemoveSession(token string) error
 
         // Rimuove tutte le sessioni scadute
         Purge()
@@ -28,4 +31,10 @@ type (
         GetExpire() time.Time
         IsExpired() bool
     }
+)
+
+var (
+    ErrSessionNotFound      = errors.New("Session not found")
+    ErrInvalidUserObject    = errors.New("Invalid user object used: <nil>")
+    ErrInvalidDataMechanism = errors.New("Invalid DataMechanism value used in AuthorityBuilder (nil)")
 )

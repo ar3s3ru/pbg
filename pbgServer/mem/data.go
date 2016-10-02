@@ -3,7 +3,6 @@ package mem
 import (
     "github.com/ar3s3ru/PokemonBattleGo/pbgServer"
     "sync"
-    "errors"
     "gopkg.in/mgo.v2/bson"
     "time"
     "encoding/json"
@@ -31,14 +30,6 @@ type (
         pokèmonFile  string
         trainersFile string
     }
-)
-
-var (
-    ErrPokèmonNotFound    = errors.New("Pokèmon not found")
-    ErrMoveNotFound       = errors.New("Move not found")
-    ErrTrainerNotFound    = errors.New("Trainer not found")
-    ErrIllegalTrainer     = errors.New("Trainer object is nil")
-    ErrInvalidTrainerName = errors.New("Invalid Trainer name used")
 )
 
 func NewDataBuilder() DataBuilder {
@@ -83,7 +74,7 @@ func (builder *memDataBuilder) Build() pbgServer.IDataMechanism {
 
 func (data *memData) AddTrainer(trainer pbgServer.Trainer) (bson.ObjectId, error) {
     if trainer == nil {
-        return "", ErrIllegalTrainer
+        return "", pbgServer.ErrIllegalTrainer
     }
 
     data.trainMutex.Lock()
@@ -99,7 +90,7 @@ func (data *memData) RemoveTrainer(id bson.ObjectId) error {
     defer data.trainMutex.Unlock()
 
     if trainer := data.trainers[id]; trainer == nil {
-        return ErrTrainerNotFound
+        return pbgServer.ErrTrainerNotFound
     } else {
         delete(data.trainers, id)
         return nil
@@ -116,7 +107,7 @@ func (data *memData) GetMoves() []pbgServer.Move {
 
 func (data *memData) GetMoveById(id int) (pbgServer.Move, error) {
     if id <= 0 || id > len(data.movedx) {
-        return nil, ErrMoveNotFound
+        return nil, pbgServer.ErrMoveNotFound
     } else {
         return data.movedx[id - 1], nil
     }
@@ -124,7 +115,7 @@ func (data *memData) GetMoveById(id int) (pbgServer.Move, error) {
 
 func (data *memData) GetPokèmonById(id int) (pbgServer.Pokèmon, error) {
     if id <= 0 || id > len(data.pokèdx) {
-        return nil, ErrPokèmonNotFound
+        return nil, pbgServer.ErrPokèmonNotFound
     } else {
         return data.pokèdx[id - 1], nil
     }
@@ -135,7 +126,7 @@ func (data *memData) GetTrainerById(id bson.ObjectId) (pbgServer.Trainer, error)
     defer data.trainMutex.Unlock()
 
     if trainer := data.trainers[id]; trainer == nil {
-        return nil, ErrTrainerNotFound
+        return nil, pbgServer.ErrTrainerNotFound
     } else {
         return trainer, nil
     }
@@ -143,7 +134,7 @@ func (data *memData) GetTrainerById(id bson.ObjectId) (pbgServer.Trainer, error)
 
 func (data *memData) GetTrainerByName(name string) (pbgServer.Trainer, error) {
     if name == "" {
-        return nil, ErrInvalidTrainerName
+        return nil, pbgServer.ErrInvalidTrainerName
     }
 
     data.trainMutex.Lock()
@@ -155,5 +146,5 @@ func (data *memData) GetTrainerByName(name string) (pbgServer.Trainer, error) {
         }
     }
 
-    return nil, ErrTrainerNotFound
+    return nil, pbgServer.ErrTrainerNotFound
 }

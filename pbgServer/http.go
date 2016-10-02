@@ -3,6 +3,7 @@ package pbgServer
 import (
     "github.com/valyala/fasthttp"
     "github.com/buaazp/fasthttprouter"
+    "log"
 )
 
 type (
@@ -34,6 +35,8 @@ func (srv *pbgServer) Handle(method HTTPMethod, path string, handler Handler) PB
         srv.httpRouter.Handle(string(method), path, func(ctx *fasthttp.RequestCtx, ps fasthttprouter.Params) {
             // New handle server-specific
             handler(srv, ctx, ps)
+            // Logging HTTP request details
+            log.Printf("[%s - %d] (%s) %s\n", ctx.Method(), ctx.Response.StatusCode(), ctx.RemoteIP(), ctx.RequestURI())
         })
     }
     // Method chaining
