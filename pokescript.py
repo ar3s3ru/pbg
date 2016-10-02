@@ -6,10 +6,18 @@
 import requests
 import json
 
+categoryTable = {
+    "physical": 0, "special": 1, "status": 2
+}
+
 typesTable = {
-    "normal": 0, "fire": 1, "fightning": 2, "water": 3, "flying": 4, "grass": 5,
+    "normal": 0, "fire": 1, "fighting": 2, "water": 3, "flying": 4, "grass": 5,
     "poison": 6, "electric": 7, "ground": 8, "psychic": 9, "rock": 10, "ice": 11,
     "bug": 12, "dragon": 13, "ghost": 14, "dark": 15, "steel": 16, "fairy": 17, "???": 18
+}
+
+baseStatTable = {
+    "hp": 0, "attack": 1, "defense": 2, "special-attack": 3, "special-defense": 4, "speed": 5
 }
 
 
@@ -18,22 +26,23 @@ def type_to_gotype(typ: str):
     return typ1 if typ1 is not None else -1
 
 
-def adding_type(pkorigin, pkdest):
-    pkdest["type"].insert(0, type_to_gotype(((pkorigin["types"])[0])["type"]["name"]))
+def category_to_gocategory(cat: str):
+    cat1 = categoryTable[cat]
+    return cat1 if cat1 is not None else 0
+
+
+def adding_type(pkorigin: dict, pkdest: dict):
+    pkdest["type"][0] = type_to_gotype(((pkorigin["types"])[0])["type"]["name"])
     if len(pkorigin["types"]) > 1:
-        pkdest["type"].insert(1, type_to_gotype(((pkorigin["types"])[1])["type"]["name"]))
-    else:
-        pkdest["type"].insert(1, -1)
+        pkdest["type"][1] = type_to_gotype(((pkorigin["types"])[1])["type"]["name"])
 
 
-def adding_base_stats(pkorigin, pkdest):
-    j = 0
+def adding_base_stats(pkorigin: dict, pkdest: dict):
     for st in pkorigin["stats"]:
-        pkdest["baseStats"].insert(j, st["base_stat"])
-        j = j + 1
+        pkdest["baseStats"][baseStatTable[st["stat"]["name"]]] = st["base_stat"]
 
 
-def adding_sprites(i: int, pkdest):
+def adding_sprites(i: int, pkdest: dict):
     pkdest["sprites"] = {
         # Works with hotlinking
         "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + str(i) + ".png",
@@ -42,43 +51,59 @@ def adding_sprites(i: int, pkdest):
 
 
 def download_pokèmon(num: int):
-    pokes = {
-        "generation": 1,
-        "count": num,
-        "pokemons": []
+    r = requests.get('http://pokeapi.co/api/v2/pokemon/' + str(num))
+    parsed_json = r.json()
+    pkm = {
+        "name": parsed_json["name"].title(),
+        "pokedex": num,
+        "baseStats": [ -1, -1, -1, -1, -1, -1 ],
+        "type": [ -1, -1 ]
     }
 
-    for i in range(1, num + 1):
-        r = requests.get('http://pokeapi.co/api/v2/pokemon/' + str(i) + '/')
-        parsed_json = r.json()
-        pkm = {
-            "name": parsed_json["name"].title(),
-            "pokedex": parsed_json["id"],
-            "baseStats": [],
-            "type": []
-        }
+    # Type creation
+    adding_type(parsed_json, pkm)
+    # Base statistics creation
+    adding_base_stats(parsed_json, pkm)
+    # Sprites
+    adding_sprites(num, pkm)
 
-        # Type creation
-        adding_type(parsed_json, pkm)
+    # Done
+    print("Donwloaded pokèmon " + str(num) + ": " + str(pkm))
+    return pkm
 
-        # Base statistics creation
-        adding_base_stats(parsed_json, pkm)
 
-        # Sprites
-        adding_sprites(i, pkm)
+def download_move(num: int):
+    r = requests.get('http://pokeapi.co/api/v2/move/' + str(num))
+    parsed_json = r.json()
+    move = {
+        "name": parsed_json["names"][0]["name"],
+        "accuracy": parsed_json["accuracy"],
+        "pps": parsed_json["pp"],
+        "priority": parsed_json["priority"],
+        "power": parsed_json["power"],
+        "type": type_to_gotype(parsed_json["type"]["name"]),
+        "category": category_to_gocategory(parsed_json["damage_class"]["name"])
+    }
 
-        # Add pokemon into the dictionary
-        pokes["pokemons"].insert(i, pkm)
-        print("Donwloaded pokèmon " + str(i) + ": " + str(pkm))
-
-    # Write dictionary to the disk
-    with open("pokedb.json", "w") as file:
-        val = json.dumps(pokes, indent=2, sort_keys=True)
-        file.write(val + "\n")
+    print("Donwloaded move " + str(num) + ": " + str(move))
+    return move
 
 
 def main():
-    download_pokèmon(10)
+    pokemon_num = 5  # 151
+    move_num = 5     # 165
+    d = {
+        "generation": 1,
+        "pokemon_count": pokemon_num,
+        "move_count": move_num,
+        "pokemons": [download_pokèmon(i) for i in range(1, pokemon_num + 1)],
+        "moves": [download_move(i) for i in range(1, move_num + 1)]
+    }
+
+    # Write dictionary to the disk
+    with open("pokedb.json", "w") as file:
+       val = json.dumps(d, indent=4, sort_keys=True)
+       file.write(val + "\n")
 
 
 if __name__ == '__main__':

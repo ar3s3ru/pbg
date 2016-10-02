@@ -34,6 +34,7 @@ type(
     // In other words, it allows database and authentication mechanisms access inside the callbacks
     // registered to handle all the HTTP requests.
     IServerContext interface {
+        GetConfiguration() Configuration
         GetDataMechanism() IDataMechanism
         GetAuthMechanism() IAuthMechanism
         GetSessMechanism() ISessionMechanism
@@ -50,7 +51,6 @@ type(
     // the particular port specified into the configuration actually used.
     PBGServer interface {
         IServerContext
-        GetConfiguration() Configuration
         // HTTP methods
         Handle(HTTPMethod, string, Handler) PBGServer
         StartServer()
@@ -65,7 +65,6 @@ type(
     // handles data access throughout the server itself.
     PBGBuilder interface {
         // Method chaining!
-        UseConfiguration(Configuration) PBGBuilder
         UseDataMechanism(DMConstructor) PBGBuilder
         UseAuthMechanism(AMConstructor) PBGBuilder
         UseSessMechanism(SMConstructor) PBGBuilder
@@ -94,21 +93,14 @@ type(
 // Crea e restituisce un oggetto PBGBuilder, per la conseguente creazione di oggetti PBGServer.
 //
 // Creates and returns a PBGBuilder object, used for the consequent creation of PBGServer objects.
-func Builder() PBGBuilder {
-    return &pbgBuilder{}
-}
-
-// Registra una particolare configurazione nel builder.
-//
-// Registers a particular configuration into the builder.
-func (builder *pbgBuilder) UseConfiguration(cfg Configuration) PBGBuilder {
-    if cfg == nil {
-        panic("Using nil as configuration is not allowed!")
-    } else {
-        builder.config = cfg
+func Builder(config Configuration) PBGBuilder {
+    if config == nil {
+        panic("Configuration not set")
     }
 
-    return builder
+    return &pbgBuilder{
+        config: config,
+    }
 }
 
 // Registra una callback per la creazione di un oggetto DataMechanism.
@@ -160,10 +152,6 @@ func (builder *pbgBuilder) UseSessMechanism(callback SMConstructor) PBGBuilder {
 // Be sure that configuration and callbacks registered are valid, before calling this method;
 // particularly, the callbacks must create 'real' objects: they can't return <nil> as return value.
 func (builder *pbgBuilder) Build() PBGServer {
-    if builder.config == nil {
-        panic("Configuration not set")
-    }
-
     var (
         dataMechanism IDataMechanism
         sessMechanism ISessionMechanism

@@ -20,12 +20,13 @@ type (
     //
     // Interface that represents a Pokèmon move.
     Move interface {
-        GetName()      string
-        GetType()      Type
-        GetCategory()  Category
-        GetDamage()    int
-        GetPrecision() int
-        GetPPs()       int
+        GetName()     string
+        GetType()     Type
+        GetCategory() Category
+        GetPriority() int
+        GetPower()    int
+        GetAccuracy() int
+        GetPPs()      int
     }
 
     // Interfaccia che rappresenta un Allenatore Pokèmon.
@@ -37,25 +38,25 @@ type (
     // with the User interface.
     Trainer interface {
         User
+        IsSet()   bool
         GetType() TrainerClass
         GetTeam() [6]PokèmonTeam
     }
 
     // Interfaccia che rappresenta un Pokèmon all'interno di una squadra.
-    // Ha una relazione di dipendenza con un oggetto Pokèmon, ma estende un Pokèmon base con possibile Nickname,
+    // Ha una relazione di composizione con un oggetto Pokèmon, ma estende un Pokèmon base con possibile Nickname,
     // un numero di mosse (da 1 a 4 possibili), un certo livello, una determinata Natura e Abilità, e un numero di IVs
     // ed EVs.
     //
     // Interface that represent a Pokèmon inside a team.
-    // It has a dependency relationship with a Pokèmon object, but extends the latter with a possible Nickname,
+    // It has a composition relationship with a Pokèmon object, but extends the latter with a possible Nickname,
     // a certain number of moves (from 1 to 4), a certain level, a specified Nature and Ability, IVs and EVs.
     PokèmonTeam interface {
-        GetNickname() string
-        GetPokemon()  Pokèmon
-        GetMoves()    [4]Move
-        GetLevel()    int
-        GetNature()   Nature
-        GetAbility()  Ability
+        Pokèmon
+        GetMoves()   [4]Move
+        GetLevel()   int
+        GetNature()  Nature
+        GetAbility() Ability
 
         GetIVs() [6]int
         GetIV()  int
@@ -110,7 +111,7 @@ const (
 const (
     Normal Type = iota
     Fire
-    Fightning
+    Fighting
     Water
     Flying
     Grass

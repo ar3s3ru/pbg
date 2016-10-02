@@ -20,10 +20,11 @@ type (
 
     memData struct {
         pokèdx   []pbgServer.Pokèmon
-        trainers map[bson.ObjectId]pbgServer.Trainer
+        movedx   []pbgServer.Move
         // NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!
         // EXTREME BOTTLENECK HERE!
         trainMutex sync.Mutex
+        trainers   map[bson.ObjectId]pbgServer.Trainer
     }
 
     memDataBuilder struct {
@@ -34,6 +35,7 @@ type (
 
 var (
     ErrPokèmonNotFound    = errors.New("Pokèmon not found")
+    ErrMoveNotFound       = errors.New("Move not found")
     ErrTrainerNotFound    = errors.New("Trainer not found")
     ErrIllegalTrainer     = errors.New("Trainer object is nil")
     ErrInvalidTrainerName = errors.New("Invalid Trainer name used")
@@ -41,19 +43,6 @@ var (
 
 func NewDataBuilder() DataBuilder {
     return &memDataBuilder{}
-}
-
-func convertLtoPL(pkdx *pokèdex) []pbgServer.Pokèmon {
-    if pkdx == nil {
-        panic("Must use a valid pokèdex value!")
-    }
-
-    list := make([]pbgServer.Pokèmon, len(pkdx.List), len(pkdx.List))
-    for i := range pkdx.List {
-        list[i] = pbgServer.Pokèmon(&pkdx.List[i])
-    }
-
-    return list
 }
 
 func (builder *memDataBuilder) UsePokèmonFile(path string) DataBuilder {
@@ -72,13 +61,21 @@ func (builder *memDataBuilder) Build() pbgServer.IDataMechanism {
     } else if file, err := ioutil.ReadFile(builder.pokèmonFile); err != nil {
         panic(err)
     } else {
-        pkms := pokèdex{}
+        pkms := struct {
+            Generation int       `json:"generation"`
+            PNumbers   int       `json:"pokemon_count"`
+            MNumbers   int       `json:"move_count"`
+            PList      []pokèmon `json:"pokemons"`
+            MList      []move    `json:"moves"`
+        }{}
+
         if err := json.Unmarshal(file, &pkms); err != nil {
             panic(err)
         }
 
         return &memData{
-            pokèdx:   convertLtoPL(&pkms),
+            pokèdx:   convertLtoPL(pkms.PList),
+            movedx:   convertLtoML(pkms.MList),
             trainers: make(map[bson.ObjectId]pbgServer.Trainer),
         }
     }
@@ -111,6 +108,18 @@ func (data *memData) RemoveTrainer(id bson.ObjectId) error {
 
 func (data *memData) GetPokèmons() []pbgServer.Pokèmon {
     return data.pokèdx
+}
+
+func (data *memData) GetMoves() []pbgServer.Move {
+    return data.movedx
+}
+
+func (data *memData) GetMoveById(id int) (pbgServer.Move, error) {
+    if id <= 0 || id > len(data.movedx) {
+        return nil, ErrMoveNotFound
+    } else {
+        return data.movedx[id - 1], nil
+    }
 }
 
 func (data *memData) GetPokèmonById(id int) (pbgServer.Pokèmon, error) {

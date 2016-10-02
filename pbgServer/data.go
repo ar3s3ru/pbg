@@ -9,7 +9,10 @@ type IDataMechanism interface {
     AddTrainer(trainer Trainer)     (bson.ObjectId, error)
     RemoveTrainer(id bson.ObjectId) error
 
-    GetPokèmons()                    []Pokèmon
+    GetPokèmons() []Pokèmon
+    GetMoves()    []Move
+
+    GetMoveById(id int)              (Move, error)
     GetPokèmonById(id int)           (Pokèmon, error)
     GetTrainerById(id bson.ObjectId) (Trainer, error)
     GetTrainerByName(name string)    (Trainer, error)

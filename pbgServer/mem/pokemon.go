@@ -5,12 +5,6 @@ import (
 )
 
 type (
-    pokèdex struct {
-        Generation int       `json:"generation"`
-        Numbers    int       `json:"count"`
-        List       []pokèmon `json:"pokemons"`
-    }
-
     pokèmon struct {
         Name   string          `json:"name"`
         Typ    pbg.PokèmonType `json:"type"`
@@ -24,14 +18,6 @@ type (
         Back  string `json:"back"`
     }
 
-    move struct {
-        name string   `json:"name"`
-        typ  pbg.Type `json:"type"`
-        dmg  int      `json:"damage"`
-        prec int      `json:"precision"`
-        catg bool     `json:"category"`
-    }
-
     nature struct {
         name string `json:"name"`
     }
@@ -40,6 +26,19 @@ type (
         name string `json:"name"`
     }
 )
+
+func convertLtoPL(pkdx []pokèmon) []pbg.Pokèmon {
+    if pkdx == nil {
+        panic("Must use a valid pokèmon list!")
+    }
+
+    list := make([]pbg.Pokèmon, len(pkdx), len(pkdx))
+    for i := range pkdx {
+        list[i] = pbg.Pokèmon(&pkdx[i])
+    }
+
+    return list
+}
 
 func (pkm *pokèmon) GetName() string {
     return pkm.Name
