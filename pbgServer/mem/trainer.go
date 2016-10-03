@@ -3,7 +3,6 @@ package mem
 import (
     "time"
     "github.com/ar3s3ru/PokemonBattleGo/pbgServer"
-    "errors"
 )
 
 type (
@@ -36,7 +35,7 @@ func (t *trainer) IsSet() bool {
 
 func (t *trainer) GetClass() (pbgServer.TrainerClass, error) {
     if !t.IsSet() {
-        return -1, errors.New("Not set!")
+        return -1, pbgServer.ErrTrainerNotSet
     }
 
     return t.Cls, nil
@@ -45,8 +44,18 @@ func (t *trainer) GetClass() (pbgServer.TrainerClass, error) {
 func (t *trainer) GetTeam() ([6]pbgServer.PokèmonTeam, error) {
     if !t.IsSet() {
         // TODO: change t.tm in nil of some sort
-        return t.Tm, errors.New("Not set!")
+        return t.Tm, pbgServer.ErrTrainerNotSet
     }
 
     return t.Tm, nil
+}
+
+func (t *trainer) SetTrainer(team [6]pbgServer.PokèmonTeam, class pbgServer.TrainerClass) error {
+    // TODO: finish this
+    return nil
+}
+
+func (t *trainer) UpdateTrainer(team [6]pbgServer.PokèmonTeam) error {
+    // TODO: finish this
+    return nil
 }

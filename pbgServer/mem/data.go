@@ -22,7 +22,7 @@ type (
         movedx   []pbgServer.Move
         // NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!
         // EXTREME BOTTLENECK HERE!
-        trainMutex sync.Mutex
+        trainMutex sync.RWMutex
         trainers   map[bson.ObjectId]pbgServer.Trainer
     }
 
@@ -70,9 +70,10 @@ func (builder *memDataBuilder) Build() pbgServer.IDataMechanism {
         }
 
         return &memData{
-            pokèdx:   convertLtoPL(pkms.PList),
-            movedx:   convertLtoML(pkms.MList),
-            trainers: make(map[bson.ObjectId]pbgServer.Trainer),
+            pokèdx:     convertLtoPL(pkms.PList),
+            movedx:     convertLtoML(pkms.MList),
+            trainers:   make(map[bson.ObjectId]pbgServer.Trainer),
+            trainMutex: sync.RWMutex{},
         }
     }
 }
@@ -127,8 +128,8 @@ func (data *memData) GetPokèmonById(id int) (pbgServer.Pokèmon, error) {
 }
 
 func (data *memData) GetTrainerById(id bson.ObjectId) (pbgServer.Trainer, error) {
-    data.trainMutex.Lock()
-    defer data.trainMutex.Unlock()
+    data.trainMutex.RLock()
+    defer data.trainMutex.RUnlock()
 
     if trainer, ok := data.trainers[id]; !ok {
         return nil, pbgServer.ErrTrainerNotFound
@@ -142,8 +143,8 @@ func (data *memData) GetTrainerByName(name string) (pbgServer.Trainer, error) {
         return nil, pbgServer.ErrInvalidTrainerName
     }
 
-    data.trainMutex.Lock()
-    defer data.trainMutex.Unlock()
+    data.trainMutex.RLock()
+    defer data.trainMutex.RUnlock()
 
     // Itera tra tutti gli oggetti Trainer
     // (non è la cosa più bella che esista...)

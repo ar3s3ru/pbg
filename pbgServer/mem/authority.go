@@ -27,7 +27,8 @@ type (
     memAuthority struct {
         dataMechanism pbgServer.IDataMechanism
         sessions      map[string]pbgServer.Session
-        sessionsMutex sync.Mutex
+        // As always, it's a bottleneck...
+        sessionsMutex sync.RWMutex
     }
 )
 
@@ -51,7 +52,7 @@ func (builder *authBuilder) Build() IAuthority {
         return &memAuthority{
             dataMechanism: builder.dataMechanism,
             sessions:      make(map[string]pbgServer.Session),
-            sessionsMutex: sync.Mutex{},
+            sessionsMutex: sync.RWMutex{},
         }
     }
 }
@@ -72,8 +73,8 @@ func (authority *memAuthority) AddSession(user pbgServer.Trainer) (pbgServer.Ses
 }
 
 func (authority *memAuthority) GetSession(token string) (pbgServer.Session, error) {
-    authority.sessionsMutex.Lock()
-    defer authority.sessionsMutex.Unlock()
+    authority.sessionsMutex.RLock()
+    defer authority.sessionsMutex.RUnlock()
 
     if s, ok := authority.sessions[token]; !ok {
         return nil, pbgServer.ErrSessionNotFound
@@ -137,7 +138,7 @@ func (authority *memAuthority) Register(username string, password string) (pbgSe
             hpwd: pwd,
             Sgup: time.Now(),
             set:  false,
-            Tm:   [...]pbgServer.PokèmonTeam{ nil, nil, nil, nil, nil, nil },
+            Tm:   [6]pbgServer.PokèmonTeam{ nil, nil, nil, nil, nil, nil },
             Cls:  pbgServer.TrainerC,
         }
 

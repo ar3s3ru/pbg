@@ -1,6 +1,9 @@
 package pbgServer
 
-import "fmt"
+import (
+    "fmt"
+    "errors"
+)
 
 type (
     // Interfaccia che rappresenta un Pokèmon.
@@ -41,6 +44,10 @@ type (
         IsSet()    bool
         GetClass() (TrainerClass, error)
         GetTeam()  ([6]PokèmonTeam, error)
+
+        // Procedures (with error handling)
+        SetTrainer([6]PokèmonTeam, TrainerClass) error
+        UpdateTrainer([6]PokèmonTeam)            error
     }
 
     // Interfaccia che rappresenta un Pokèmon all'interno di una squadra.
@@ -181,6 +188,9 @@ var (
         "PokèManiac", "Psychic", "Rocker", "Rocket", "Sailor", "Scientist", "Super Nerd", "Swimmer", "Tamer",
         "Youngster", "Chief",
     }
+
+    // Errori...
+    ErrTrainerNotSet = errors.New("Trainer not set!")
 )
 
 func (c Category) String() string {
