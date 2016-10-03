@@ -1,4 +1,4 @@
-spackage mem
+package mem
 
 import (
     "github.com/ar3s3ru/PokemonBattleGo/pbgServer"
@@ -94,7 +94,7 @@ func (data *memData) RemoveTrainer(id bson.ObjectId) error {
     data.trainMutex.Lock()
     defer data.trainMutex.Unlock()
 
-    if trainer, ok := data.trainers[id]; !ok {
+    if _, ok := data.trainers[id]; !ok {
         return pbgServer.ErrTrainerNotFound
     } else {
         delete(data.trainers, id)

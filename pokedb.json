@@ -1,6 +1,6 @@
 {
     "generation": 1,
-    "move_count": 5,
+    "move_count": 10,
     "moves": [
         {
             "accuracy": 100,
@@ -46,9 +46,54 @@
             "pps": 20,
             "priority": 0,
             "type": 0
+        },
+        {
+            "accuracy": 100,
+            "category": 0,
+            "name": "Pay Day",
+            "power": 40,
+            "pps": 20,
+            "priority": 0,
+            "type": 0
+        },
+        {
+            "accuracy": 100,
+            "category": 0,
+            "name": "Fire Punch",
+            "power": 75,
+            "pps": 15,
+            "priority": 0,
+            "type": 1
+        },
+        {
+            "accuracy": 100,
+            "category": 0,
+            "name": "Ice Punch",
+            "power": 75,
+            "pps": 15,
+            "priority": 0,
+            "type": 11
+        },
+        {
+            "accuracy": 100,
+            "category": 0,
+            "name": "Thunder Punch",
+            "power": 75,
+            "pps": 15,
+            "priority": 0,
+            "type": 7
+        },
+        {
+            "accuracy": 100,
+            "category": 0,
+            "name": "Scratch",
+            "power": 40,
+            "pps": 35,
+            "priority": 0,
+            "type": 0
         }
     ],
-    "pokemon_count": 5,
+    "pokemon_count": 10,
     "pokemons": [
         {
             "baseStats": [
@@ -147,6 +192,106 @@
             },
             "type": [
                 1,
+                -1
+            ]
+        },
+        {
+            "baseStats": [
+                78,
+                84,
+                78,
+                109,
+                85,
+                100
+            ],
+            "name": "Charizard",
+            "pokedex": 6,
+            "sprites": {
+                "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/6.png",
+                "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png"
+            },
+            "type": [
+                4,
+                1
+            ]
+        },
+        {
+            "baseStats": [
+                44,
+                48,
+                65,
+                50,
+                64,
+                43
+            ],
+            "name": "Squirtle",
+            "pokedex": 7,
+            "sprites": {
+                "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/7.png",
+                "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png"
+            },
+            "type": [
+                3,
+                -1
+            ]
+        },
+        {
+            "baseStats": [
+                59,
+                63,
+                80,
+                65,
+                80,
+                58
+            ],
+            "name": "Wartortle",
+            "pokedex": 8,
+            "sprites": {
+                "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/8.png",
+                "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/8.png"
+            },
+            "type": [
+                3,
+                -1
+            ]
+        },
+        {
+            "baseStats": [
+                79,
+                83,
+                100,
+                85,
+                105,
+                78
+            ],
+            "name": "Blastoise",
+            "pokedex": 9,
+            "sprites": {
+                "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/9.png",
+                "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/9.png"
+            },
+            "type": [
+                3,
+                -1
+            ]
+        },
+        {
+            "baseStats": [
+                45,
+                30,
+                35,
+                20,
+                20,
+                45
+            ],
+            "name": "Caterpie",
+            "pokedex": 10,
+            "sprites": {
+                "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/10.png",
+                "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png"
+            },
+            "type": [
+                12,
                 -1
             ]
         }

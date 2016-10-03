@@ -86,7 +86,7 @@ func (authority *memAuthority) RemoveSession(token string) error {
     authority.sessionsMutex.Lock()
     defer authority.sessionsMutex.Unlock()
 
-    if s, ok := authority.sessions[token]; !ok {
+    if _, ok := authority.sessions[token]; !ok {
         return pbgServer.ErrSessionNotFound
     } else {
         delete(authority.sessions, token)
