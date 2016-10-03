@@ -7,6 +7,7 @@ import (
     "encoding/json"
     "fmt"
     "html/template"
+    "log"
 )
 
 func getPostBody(postBody []byte) (user string, pass string, err error) {
@@ -35,6 +36,7 @@ func handleGetRegister(_ pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ f
 
 func handleRegister(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
     if un, pw, err := getPostBody(ctx.PostBody()); err != nil {
+        log.Printf("Using body: %s\n", ctx.PostBody())
         ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
     } else if u, id, err := sctx.GetAuthMechanism().Register(un, pw); err != nil {
         ctx.Error(err.Error(), fasthttp.StatusBadRequest)
