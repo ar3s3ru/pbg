@@ -75,27 +75,23 @@ func (authority *memAuthority) GetSession(token string) (pbgServer.Session, erro
     authority.sessionsMutex.Lock()
     defer authority.sessionsMutex.Unlock()
 
-    for _, v := range authority.sessions {
-        if v.GetToken() == token {
-            return v, nil
-        }
+    if s, ok := authority.sessions[token]; !ok {
+        return nil, pbgServer.ErrSessionNotFound
+    } else {
+        return s, nil
     }
-
-    return nil, pbgServer.ErrSessionNotFound
 }
 
 func (authority *memAuthority) RemoveSession(token string) error {
     authority.sessionsMutex.Lock()
     defer authority.sessionsMutex.Unlock()
 
-    for k, v := range authority.sessions {
-        if v.GetToken() == token {
-            delete(authority.sessions, k)
-            return nil
-        }
+    if s, ok := authority.sessions[token]; !ok {
+        return pbgServer.ErrSessionNotFound
+    } else {
+        delete(authority.sessions, token)
+        return nil
     }
-
-    return pbgServer.ErrSessionNotFound
 }
 
 func (authority *memAuthority) Purge() {
@@ -135,6 +131,7 @@ func (authority *memAuthority) Register(username string, password string) (pbgSe
         // Problem with salting...
         return nil, "", err
     } else {
+        // New trainer object
         trainer := &trainer{
             Name: username,
             hpwd: pwd,

@@ -17,31 +17,10 @@
 
 {{ define "metadata" }}
 <script src="/static/js/jquery.min.js"></script>
-<!--<script type="text/javascript">-->
-
-    <!--var formData = new FormData(document.querySelector("form"));-->
-
-    <!--$("#registrationForm").submit(function (e) {-->
-        <!--var formData = JSON.stringify(this.serializeArray());-->
-        <!--$.ajax({-->
-            <!--type: 'POST',-->
-            <!--url: '/register',-->
-            <!--data: formData,-->
-            <!--dataType: 'json',-->
-            <!--contentType: 'application/json',-->
-            <!--//processData: false,-->
-            <!--success: function (data) {-->
-                <!--alert(data);-->
-            <!--}-->
-        <!--});-->
-
-        <!--e.preventDefault();-->
-    <!--});-->
-<!--</script>-->
 {{ end }}
 
 {{ define "content" }}
-<form id="registrationForm" action="/register" enctype="application/json" method="post">
+<form id="registrationForm" action="/register" method="post">
     <fieldset>
         <legend>Insert your new username and password:</legend>
 

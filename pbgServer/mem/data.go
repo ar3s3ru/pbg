@@ -1,4 +1,4 @@
-package mem
+spackage mem
 
 import (
     "github.com/ar3s3ru/PokemonBattleGo/pbgServer"
@@ -31,6 +31,11 @@ type (
         trainersFile string
     }
 )
+
+func inRange(i int, upperBound int) bool {
+    // Controlliamo se i si trova nel range tra (1, upperBound)
+    return i < 1 || i > upperBound
+}
 
 func NewDataBuilder() DataBuilder {
     return &memDataBuilder{}
@@ -89,7 +94,7 @@ func (data *memData) RemoveTrainer(id bson.ObjectId) error {
     data.trainMutex.Lock()
     defer data.trainMutex.Unlock()
 
-    if trainer := data.trainers[id]; trainer == nil {
+    if trainer, ok := data.trainers[id]; !ok {
         return pbgServer.ErrTrainerNotFound
     } else {
         delete(data.trainers, id)
@@ -106,7 +111,7 @@ func (data *memData) GetMoves() []pbgServer.Move {
 }
 
 func (data *memData) GetMoveById(id int) (pbgServer.Move, error) {
-    if id <= 0 || id > len(data.movedx) {
+    if inRange(id, len(data.movedx)) {
         return nil, pbgServer.ErrMoveNotFound
     } else {
         return data.movedx[id - 1], nil
@@ -114,7 +119,7 @@ func (data *memData) GetMoveById(id int) (pbgServer.Move, error) {
 }
 
 func (data *memData) GetPokèmonById(id int) (pbgServer.Pokèmon, error) {
-    if id <= 0 || id > len(data.pokèdx) {
+    if inRange(id, len(data.pokèdx)) {
         return nil, pbgServer.ErrPokèmonNotFound
     } else {
         return data.pokèdx[id - 1], nil
@@ -125,7 +130,7 @@ func (data *memData) GetTrainerById(id bson.ObjectId) (pbgServer.Trainer, error)
     data.trainMutex.Lock()
     defer data.trainMutex.Unlock()
 
-    if trainer := data.trainers[id]; trainer == nil {
+    if trainer, ok := data.trainers[id]; !ok {
         return nil, pbgServer.ErrTrainerNotFound
     } else {
         return trainer, nil
@@ -140,6 +145,8 @@ func (data *memData) GetTrainerByName(name string) (pbgServer.Trainer, error) {
     data.trainMutex.Lock()
     defer data.trainMutex.Unlock()
 
+    // Itera tra tutti gli oggetti Trainer
+    // (non è la cosa più bella che esista...)
     for _, trainer := range data.trainers {
         if trainer.GetName() == name {
             return trainer, nil
