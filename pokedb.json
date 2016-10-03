@@ -1,0 +1,154 @@
+{
+    "generation": 1,
+    "move_count": 5,
+    "moves": [
+        {
+            "accuracy": 100,
+            "category": 0,
+            "name": "Pound",
+            "power": 40,
+            "pps": 35,
+            "priority": 0,
+            "type": 0
+        },
+        {
+            "accuracy": 100,
+            "category": 0,
+            "name": "Karate Chop",
+            "power": 50,
+            "pps": 25,
+            "priority": 0,
+            "type": 2
+        },
+        {
+            "accuracy": 85,
+            "category": 0,
+            "name": "Double Slap",
+            "power": 15,
+            "pps": 10,
+            "priority": 0,
+            "type": 0
+        },
+        {
+            "accuracy": 85,
+            "category": 0,
+            "name": "Comet Punch",
+            "power": 18,
+            "pps": 15,
+            "priority": 0,
+            "type": 0
+        },
+        {
+            "accuracy": 85,
+            "category": 0,
+            "name": "Mega Punch",
+            "power": 80,
+            "pps": 20,
+            "priority": 0,
+            "type": 0
+        }
+    ],
+    "pokemon_count": 5,
+    "pokemons": [
+        {
+            "baseStats": [
+                45,
+                49,
+                49,
+                65,
+                65,
+                45
+            ],
+            "name": "Bulbasaur",
+            "pokedex": 1,
+            "sprites": {
+                "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/1.png",
+                "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
+            },
+            "type": [
+                6,
+                5
+            ]
+        },
+        {
+            "baseStats": [
+                60,
+                62,
+                63,
+                80,
+                80,
+                60
+            ],
+            "name": "Ivysaur",
+            "pokedex": 2,
+            "sprites": {
+                "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/2.png",
+                "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png"
+            },
+            "type": [
+                6,
+                5
+            ]
+        },
+        {
+            "baseStats": [
+                80,
+                82,
+                83,
+                100,
+                100,
+                80
+            ],
+            "name": "Venusaur",
+            "pokedex": 3,
+            "sprites": {
+                "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/3.png",
+                "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/3.png"
+            },
+            "type": [
+                6,
+                5
+            ]
+        },
+        {
+            "baseStats": [
+                39,
+                52,
+                43,
+                60,
+                50,
+                65
+            ],
+            "name": "Charmander",
+            "pokedex": 4,
+            "sprites": {
+                "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/4.png",
+                "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
+            },
+            "type": [
+                1,
+                -1
+            ]
+        },
+        {
+            "baseStats": [
+                58,
+                64,
+                58,
+                80,
+                65,
+                80
+            ],
+            "name": "Charmeleon",
+            "pokedex": 5,
+            "sprites": {
+                "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/5.png",
+                "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/5.png"
+            },
+            "type": [
+                1,
+                -1
+            ]
+        }
+    ]
+}
