@@ -3,7 +3,7 @@
 # Script per fregare i dati da PokèAPI e renderli compatibili a PBG.
 # Si ringrazia il grande capo Gianni Modica per lo script!
 # ------------------------------------------------------------------
-import requests
+from urllib.request import Request, urlopen
 import json
 
 categoryTable = {
@@ -51,8 +51,9 @@ def adding_sprites(i: int, pkdest: dict):
 
 
 def download_pokèmon(num: int):
-    r = requests.get('http://pokeapi.co/api/v2/pokemon/' + str(num))
-    parsed_json = r.json()
+    req = Request('http://pokeapi.co/api/v2/pokemon/'  + str(num), headers={'User-Agent': 'Mozilla/5.0'})
+    r = urlopen(req)
+    parsed_json = json.loads(r.read().decode('utf-8'))
     pkm = {
         "name": parsed_json["name"].title(),
         "pokedex": num,
@@ -73,8 +74,9 @@ def download_pokèmon(num: int):
 
 
 def download_move(num: int):
-    r = requests.get('http://pokeapi.co/api/v2/move/' + str(num))
-    parsed_json = r.json()
+    req = Request('http://pokeapi.co/api/v2/move/' + str(num), headers={'User-Agent': 'Mozilla/5.0'})
+    r = urlopen(req)
+    parsed_json = json.loads(r.read().decode('utf-8'))
     move = {
         "name": parsed_json["names"][0]["name"],
         "accuracy": parsed_json["accuracy"],

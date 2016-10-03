@@ -6,6 +6,7 @@ import (
     "sync"
     "golang.org/x/crypto/bcrypt"
     "time"
+    "github.com/satori/go.uuid"
 )
 
 type (
@@ -25,7 +26,7 @@ type (
 
     memAuthority struct {
         dataMechanism pbgServer.IDataMechanism
-        sessions      map[bson.ObjectId]pbgServer.Session
+        sessions      map[string]pbgServer.Session
         sessionsMutex sync.Mutex
     }
 )
@@ -49,15 +50,25 @@ func (builder *authBuilder) Build() IAuthority {
     } else {
         return &memAuthority{
             dataMechanism: builder.dataMechanism,
-            sessions:      make(map[bson.ObjectId]pbgServer.Session),
+            sessions:      make(map[string]pbgServer.Session),
             sessionsMutex: sync.Mutex{},
         }
     }
 }
 
-func (authority *memAuthority) AddSession(user pbgServer.User) pbgServer.Session {
-    // TODO: finish this
-    return nil
+func (authority *memAuthority) AddSession(user pbgServer.User) (pbgServer.Session, error) {
+    if user == nil {
+        return nil, pbgServer.ErrInvalidUserObject
+    }
+
+    sess := &session{
+        user:   user,
+        token:  uuid.NewV4().String(),
+        expire: time.Now().Add(30 * time.Hour), // Token dura per 30 ore
+    }
+
+    authority.sessions[sess.GetToken()] = sess
+    return sess, nil
 }
 
 func (authority *memAuthority) GetSession(token string) (pbgServer.Session, error) {
@@ -104,7 +115,7 @@ func (authority *memAuthority) DoLogin(username string, password string) (pbgSer
     } else if err := bcrypt.CompareHashAndPassword([]byte(usr.GetPasswordHash()), []byte(password)); err != nil {
         return nil, err
     } else {
-        return authority.AddSession(usr), nil
+        return authority.AddSession(usr)
     }
 }
 

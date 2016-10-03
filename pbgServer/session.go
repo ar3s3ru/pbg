@@ -1,18 +1,14 @@
 package pbgServer
 
-import (
-    "time"
-    "errors"
-)
+import "errors"
 
 type (
-    // TODO: add error handling?
     // Interfaccia che gestisce le sessioni utente all'interno del server.
     //
     // Interface that handles user's sessions inside the server.
     ISessionMechanism interface {
         // Gestione sessioni
-        AddSession(user User)       Session
+        AddSession(user User)       (Session, error)
         GetSession(token string)    (Session, error)
         RemoveSession(token string) error
 
@@ -28,7 +24,6 @@ type (
     Session interface {
         GetUserReference() User
         GetToken()  string
-        GetExpire() time.Time
         IsExpired() bool
     }
 )

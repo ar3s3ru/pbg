@@ -37,10 +37,10 @@ func handleRegister(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ f
 func handleLogin(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
     if un, pw, err := getPostBody(ctx.PostBody()); err != nil {
         ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
-    } else if _, err := sctx.GetAuthMechanism().DoLogin(un, pw); err != nil {
+    } else if sess, err := sctx.GetAuthMechanism().DoLogin(un, pw); err != nil {
         ctx.Error(err.Error(), fasthttp.StatusBadRequest)
     } else {
         ctx.SetStatusCode(fasthttp.StatusCreated)
-        fmt.Fprintln(ctx, "It worked!")
+        fmt.Fprintf(ctx, "Session created with token %s\n", sess.GetToken())
     }
 }
