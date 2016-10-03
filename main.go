@@ -6,6 +6,8 @@ import (
     "github.com/ar3s3ru/PokemonBattleGo/pbgServer"
     "github.com/ar3s3ru/PokemonBattleGo/pbgServer/mem"
     "path"
+    "fmt"
+    "encoding/json"
 )
 
 const (
@@ -79,7 +81,15 @@ func main() {
     srv.Handle(
         pbgServer.POST, "/register", handleRegister,
     ).Handle(
+        pbgServer.GET, "/register", handleGetRegister,
+    ).Handle(
         pbgServer.POST, "/login", handleLogin,
+    ).AuthHandle(
+        pbgServer.GET, "/me",
+        func(sess pbgServer.Session, sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
+            lel, _ := json.Marshal(sess.GetUserReference())
+            fmt.Fprintf(ctx, "It's me, %s\n", lel)
+        },
     )
     // Avvia il server!
     srv.StartServer()

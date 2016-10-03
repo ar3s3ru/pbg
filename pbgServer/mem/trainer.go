@@ -8,18 +8,18 @@ import (
 
 type (
     trainer struct {
-        name string
-        hpwd []byte
-        sgup time.Time
+        Name string                   `json:"username"`
+        hpwd []byte                   `json:"-"`
+        Sgup time.Time                `json:"sign_up"`
         // Trainer related fieds
-        set  bool
-        cls  pbgServer.TrainerClass
-        tm   [6]pbgServer.PokèmonTeam
+        set  bool                     `json:"-"`
+        Cls  pbgServer.TrainerClass   `json:"class"`
+        Tm   [6]pbgServer.PokèmonTeam `json:"team"`
     }
 )
 
 func (t *trainer) GetName() string {
-    return t.name
+    return t.Name
 }
 
 func (t *trainer) GetPasswordHash() []byte {
@@ -27,7 +27,7 @@ func (t *trainer) GetPasswordHash() []byte {
 }
 
 func (t *trainer) GetSignUpDate() time.Time {
-    return t.sgup
+    return t.Sgup
 }
 
 func (t *trainer) IsSet() bool {
@@ -39,14 +39,14 @@ func (t *trainer) GetClass() (pbgServer.TrainerClass, error) {
         return -1, errors.New("Not set!")
     }
 
-    return t.cls, nil
+    return t.Cls, nil
 }
 
 func (t *trainer) GetTeam() ([6]pbgServer.PokèmonTeam, error) {
     if !t.IsSet() {
         // TODO: change t.tm in nil of some sort
-        return t.tm, errors.New("Not set!")
+        return t.Tm, errors.New("Not set!")
     }
 
-    return t.tm, nil
+    return t.Tm, nil
 }

@@ -8,7 +8,7 @@ type (
     // Interface that handles user's sessions inside the server.
     ISessionMechanism interface {
         // Gestione sessioni
-        AddSession(user User)       (Session, error)
+        AddSession(user Trainer)    (Session, error)
         GetSession(token string)    (Session, error)
         RemoveSession(token string) error
 
@@ -22,14 +22,15 @@ type (
     // Interface that represent an user session onto the server.
     // A session is identified by its token, and it has a certain validity period.
     Session interface {
-        GetUserReference() User
-        GetToken()  string
-        IsExpired() bool
+        GetUserReference() Trainer
+        GetToken()         string
+        IsExpired()        bool
     }
 )
 
 var (
     ErrSessionNotFound      = errors.New("Session not found")
+    ErrSessionExpired       = errors.New("Session is expired")
     ErrInvalidUserObject    = errors.New("Invalid user object used: <nil>")
     ErrInvalidDataMechanism = errors.New("Invalid DataMechanism value used in AuthorityBuilder (nil)")
 )

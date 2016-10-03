@@ -6,6 +6,7 @@ import (
     "github.com/buaazp/fasthttprouter"
     "encoding/json"
     "fmt"
+    "html/template"
 )
 
 func getPostBody(postBody []byte) (user string, pass string, err error) {
@@ -20,6 +21,16 @@ func getPostBody(postBody []byte) (user string, pass string, err error) {
 
     user, pass, err = req.Username, req.Password, nil
     return
+}
+
+func handleGetRegister(_ pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
+    if t, err := template.ParseFiles("templates/layout.html", "templates/registration.html"); err != nil {
+        ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+    } else if err := t.Execute(ctx, nil); err != nil {
+        ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+    } else {
+        ctx.SetContentType("text/html; charset=utf-8")
+    }
 }
 
 func handleRegister(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {

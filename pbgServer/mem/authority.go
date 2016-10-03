@@ -56,7 +56,7 @@ func (builder *authBuilder) Build() IAuthority {
     }
 }
 
-func (authority *memAuthority) AddSession(user pbgServer.User) (pbgServer.Session, error) {
+func (authority *memAuthority) AddSession(user pbgServer.Trainer) (pbgServer.Session, error) {
     if user == nil {
         return nil, pbgServer.ErrInvalidUserObject
     }
@@ -136,12 +136,12 @@ func (authority *memAuthority) Register(username string, password string) (pbgSe
         return nil, "", err
     } else {
         trainer := &trainer{
-            name: username,
+            Name: username,
             hpwd: pwd,
-            sgup: time.Now(),
+            Sgup: time.Now(),
             set:  false,
-            tm:   [...]pbgServer.PokèmonTeam{ nil, nil, nil, nil, nil, nil },
-            cls:  pbgServer.TrainerC,
+            Tm:   [...]pbgServer.PokèmonTeam{ nil, nil, nil, nil, nil, nil },
+            Cls:  pbgServer.TrainerC,
         }
 
         if id, err := authority.dataMechanism.AddTrainer(trainer); err != nil {

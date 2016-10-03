@@ -7,13 +7,13 @@ import (
 
 type (
     session struct {
-        user   pbgServer.User
+        user   pbgServer.Trainer
         token  string
         expire time.Time
     }
 )
 
-func (s *session) GetUserReference() pbgServer.User {
+func (s *session) GetUserReference() pbgServer.Trainer {
     return s.user
 }
 

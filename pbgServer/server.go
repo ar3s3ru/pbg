@@ -51,8 +51,10 @@ type(
     // the particular port specified into the configuration actually used.
     PBGServer interface {
         IServerContext
-        // HTTP methods
-        Handle(HTTPMethod, string, Handler) PBGServer
+        // HTTP stuff
+        Handle(HTTPMethod, string, Handler)      PBGServer
+        AuthHandle(HTTPMethod, string, AHandler) PBGServer
+        // Start server, of course...
         StartServer()
     }
 
@@ -99,7 +101,7 @@ func Builder(config Configuration) PBGBuilder {
     }
 
     return &pbgBuilder{
-        config: config,
+        config:  config,
     }
 }
 
