@@ -41,7 +41,9 @@ Main reason is: **WRITE YOUR OWN MODELS!**
 
 Blindly trust user initializations, given a third-party data structure, is **foolish**.
 
-Remember the golden rule, _never, **EVER**, trust the final user_.
+Remember the golden rule:
+> _never, **EVER**, trust the final user_.
+
 So, interfaces **are just fine**.
 
 From [Interfaces][go-interfaces-ref] on *Effective Go*:
