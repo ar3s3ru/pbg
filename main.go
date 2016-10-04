@@ -15,6 +15,35 @@ const (
     CfgLayoutFile  = "LAYOUT_FILE"
 )
 
+func withFlavors(handlerJSON, handlerHTML pbgServer.Handler) pbgServer.Handler {
+    return func (sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
+        fmt.Println(ctx.Request.Header.String())
+        fmt.Println(string(ctx.Request.Header.Method()))
+
+        if ctx.Request.Header.HasAcceptEncoding("application/json") {
+            handlerJSON(sctx, ctx, pm)
+            ctx.SetContentType("application/json; charset=utf-8")
+        } else {
+            handlerHTML(sctx, ctx, pm)
+            ctx.SetContentType("text/html; charset=utf-8")
+        }
+    }
+}
+
+func withAuthFlavors(handlerJSON, handlerHTML pbgServer.AHandler) pbgServer.AHandler {
+    return func (sess pbgServer.Session, sctx pbgServer.IServerContext, 
+        ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
+
+        if ctx.Request.Header.HasAcceptEncoding("application/json") {
+            handlerJSON(sess, sctx, ctx, pm)
+            ctx.SetContentType("application/json; charset=utf-8")
+        } else {
+            handlerHTML(sess, sctx, ctx, pm)
+            ctx.SetContentType("text/html; charset=utf-8")
+        }
+    }
+}
+
 func handleStatic(_ pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
     pth := path.Join("static", pm.ByName("resource"))
     fasthttp.ServeFile(ctx, pth)
@@ -65,7 +94,16 @@ func main() {
 
     // Funzioni per i pokèmon
     srv.Handle(
-        pbgServer.GET, "/pokemons", handlePokèmons,
+        pbgServer.GET, "/pokemons", withFlavors(
+            // JSON handler
+            func (sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
+                pok := sctx.GetDataMechanism().GetPokèmons()
+                lel, _ := json.Marshal(pok)
+                fmt.Fprint(ctx, lel)
+            },
+            // HTML handler
+            handlePokèmons,
+        ),
     ).Handle(
         pbgServer.GET, "/pokemon/:id", handlePokèmonId,
     )
@@ -86,10 +124,21 @@ func main() {
         pbgServer.POST, "/login", handleLogin,
     ).AuthHandle(
         pbgServer.GET, "/me",
-        func(sess pbgServer.Session, sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
-            lel, _ := json.Marshal(sess.GetUserReference())
-            fmt.Fprintf(ctx, "It's me, %s\n", lel)
-        },
+        withAuthFlavors(
+            // JSON hand
+            func(sess pbgServer.Session, sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
+                lel, _ := json.Marshal(sess.GetUserReference())
+                fmt.Fprint(ctx, lel)
+            }, 
+            // HTML handler
+            func(sess pbgServer.Session, sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
+                if lel, err := json.Marshal(sess.GetUserReference()); err != nil {
+                    ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+                } else {
+                    fmt.Fprintf(ctx, "It's me, MARIO!\nNo, kidding, this: %s\n", lel)
+                }
+            },
+        ),
     )
     // Avvia il server!
     srv.StartServer()
