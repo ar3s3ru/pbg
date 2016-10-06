@@ -92,8 +92,8 @@ def download_move(num: int):
 
 
 def main():
-    pokemon_num = 10  # 151
-    move_num = 10     # 165
+    pokemon_num = 151  # 151
+    move_num = 165     # 165
     d = {
         "generation": 1,
         "pokemon_count": pokemon_num,
