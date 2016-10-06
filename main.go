@@ -108,6 +108,17 @@ func main() {
     }
 
     srv := getServer(port)
+    wd, err := os.Getwd()
+    if err != nil {
+        panic(err)
+    }
+
+    fs := &fasthttp.FS{
+        Root:               wd,
+        GenerateIndexPages: true,
+    }
+
+    staticReqHndl := fs.NewRequestHandler()
 
     // Funzioni per i pokèmon
     srv.APIHandle(pbgServer.GET, APIPokèmonList, handlePokèmons)
@@ -118,7 +129,11 @@ func main() {
     srv.APIHandle(pbgServer.GET, APIMoveEntry, handleMoveId)
 
     // File server!
-    srv.Handle(pbgServer.GET, StaticPath, handleStatic)
+    srv.Handle(pbgServer.GET, StaticPath,
+        func (ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
+            staticReqHndl(ctx)
+        },
+    )
 
     // Login e registrazione
     srv.APIHandle(pbgServer.POST, APIRegister, handleRegister)
