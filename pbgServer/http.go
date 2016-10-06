@@ -14,8 +14,9 @@ type (
         GetAPIResponse() APIResponse
 
         Handle(HTTPMethod, string, fasthttprouter.Handle) PBGServer
-        APIHandle(HTTPMethod, string, Handler)            PBGServer
-        APIAuthHandle(HTTPMethod, string, AHandler)       PBGServer
+        ServHandle(HTTPMethod, string, Handler)           PBGServer
+        APIHandle(HTTPMethod, string, APIHandler)         PBGServer
+        APIAuthHandle(HTTPMethod, string, APIAuthHandler) PBGServer
     }
 
     // Rappresenta i possibili metodi HTTP utilizzabili nella funzione Handle().
@@ -23,18 +24,24 @@ type (
     // Represents HTTP methods that can be used into the Handle() function.
     HTTPMethod string
 
-    APIResponse func(int, interface{}, error, *fasthttp.RequestCtx)
+    // Callback che si occupa di fare marshalling delle risposte alle richieste HTTP effettuate
+    // all'API REST del server.
+    APIResponse func (int, interface{}, error, *fasthttp.RequestCtx)
+
+    // Handle per richieste HTTP che riguardano il contesto del server, ma che non appartengono all'API REST
+    // del server stesso.
+    Handler func (IServerContext, *fasthttp.RequestCtx, fasthttprouter.Params)
 
     // Funzione callback che viene chiamata dal router del server ogni qualvolta che arriva
     // una richiesta HTTP da gestire in un particolare percorso.
     //
     // Callback function called by server's router every time an HTTP request arrives and needs to be handled.
-    Handler func(IServerContext, *fasthttp.RequestCtx, fasthttprouter.Params) (int, interface{}, error)
+    APIHandler func (IServerContext, *fasthttp.RequestCtx, fasthttprouter.Params) (int, interface{}, error)
 
     // Funzione callback per la gestione di richieste HTTP autenticate.
     //
     // Callback function for authenticated HTTP requests management.
-    AHandler func(Session, IServerContext, *fasthttp.RequestCtx, fasthttprouter.Params) (int, interface{}, error)
+    APIAuthHandler func (Session, IServerContext, *fasthttp.RequestCtx, fasthttprouter.Params) (int, interface{}, error)
 )
 
 const (
@@ -89,7 +96,19 @@ func (srv *pbgServer) Handle(method HTTPMethod, path string, handler fasthttprou
     return srv
 }
 
-func (srv *pbgServer) APIHandle(method HTTPMethod, path string, handler Handler) PBGServer {
+func (srv *pbgServer) ServHandle(method HTTPMethod, path string, handler Handler) PBGServer {
+    if handler == nil {
+        panic(ErrInvalidAPIHandler)
+    }
+
+    srv.httpRouter.Handle(string(method), path, func (ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
+        handler(srv, ctx, pm)
+    })
+
+    return srv
+}
+
+func (srv *pbgServer) APIHandle(method HTTPMethod, path string, handler APIHandler) PBGServer {
     if handler == nil {
         panic(ErrInvalidAPIHandler)
     }
@@ -102,7 +121,7 @@ func (srv *pbgServer) APIHandle(method HTTPMethod, path string, handler Handler)
     return srv
 }
 
-func (srv *pbgServer) APIAuthHandle(method HTTPMethod, path string, handler AHandler) PBGServer {
+func (srv *pbgServer) APIAuthHandle(method HTTPMethod, path string, handler APIAuthHandler) PBGServer {
     if handler == nil {
         panic(ErrInvalidAPIAuthHandler)
     }

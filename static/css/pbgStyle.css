@@ -13,26 +13,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+:root {
+    --base-color:      #181312;
+    --clear-color:     #FFD6C9;
+    --mid-clear-color: #8E766E;
+    --mid-color:       #723E2E;
+    --dark-color:      #7A1F02;
+
+    --white: #F2F2F2;
+}
+
 body {
     font-family: "Raleway", sans-serif;
+    background-color: var(--base-color);
 }
 
-table {
-    border: 1px solid #f5f5f5;
+.flex-container {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-flow: row wrap;
+    flex-flow: row wrap;
 }
 
-th {
-    font-size: small;
-    border-left: 1px solid #f5f5f5;
-    background-color: #FFE4C4;
-    color: midnightblue;
+.flex-container > * {
+    padding: 15px;
+    flex: 1 100%;
 }
 
-td {
+.header {
     text-align: center;
-    background-color: rgba(255, 228, 196, 0.20);
 }
 
-th, td {
-    padding: 20px;
+.header h1 {
+    color: var(--clear-color);
+}
+
+.header h4 {
+    color: var(--mid-clear-color);
+}
+
+.nav {
+    background-color: var(--mid-clear-color);
+}
+
+.nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.content {
+    background-color: var(--white);
+}
+
+.footer {
+    background-color: var(--mid-color);
+}
+
+@media all {
+    .content { flex: 4 0px;  }
+    .nav     { flex: 1 auto; }
+
+    .nav     { order: 1; }
+    .content { order: 2; }
+    .footer  { order: 3; }
 }

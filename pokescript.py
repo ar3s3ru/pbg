@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# coding=utf-8
 # ------------------------------------------------------------------
 # Script per fregare i dati da PokèAPI e renderli compatibili a PBG.
 # Si ringrazia il grande capo Gianni Modica per lo script!

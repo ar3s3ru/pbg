@@ -70,7 +70,11 @@ func apiResponseCallback(statusCode int, data interface{}, err error, ctx *fasth
 }
 
 func newConfig(port int) pbgServer.Configuration {
-    return pbgServer.NewConfig().SetHTTPPort(port).SetValue(CfgPokèmonFile, "pokedb.json")
+    return pbgServer.NewConfig().SetHTTPPort(port).SetValue(
+        CfgPokèmonFile, "pokedb.json",
+    ).SetValue(
+        CfgLayoutFile, path.Join("templates", "layout.html"),
+    )
 }
 
 func getServer(port int) pbgServer.PBGServer {
@@ -132,6 +136,18 @@ func main() {
     srv.Handle(pbgServer.GET, StaticPath,
         func (ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
             staticReqHndl(ctx)
+        },
+    )
+
+    // Home screen!
+    srv.ServHandle(pbgServer.GET, "/",
+        func (sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
+            if tpath := sctx.GetConfiguration().GetValue(CfgLayoutFile); tpath == nil {
+                ctx.Error("Invalid Layout file used", fasthttp.StatusInternalServerError)
+            } else { //if err := template.New(tpath.(string)).Execute(ctx, nil); err != nil {
+                //ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+                fasthttp.ServeFile(ctx, tpath.(string))
+            }
         },
     )
 
