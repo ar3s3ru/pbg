@@ -7,12 +7,19 @@ import (
     "encoding/json"
 )
 
-func getPostBody(postBody []byte) (user string, pass string, err error) {
-    req := struct {
-        Username string `json:"username"`
-        Password string `json:"password"`
-    } {}
+type logRegPostBody struct {
+    Username string `json:"username"`
+    Password string `json:"password"`
+}
 
+const (
+    APIRegister  = APIEndpoint + "/register"
+    APILogin     = APIEndpoint + "/login"
+    APIMe        = APIEndpoint + "/me"
+)
+
+func getPostBody(postBody []byte) (user string, pass string, err error) {
+    req := logRegPostBody{}
     if err = json.Unmarshal(postBody, &req); err != nil {
         return
     }
@@ -41,4 +48,9 @@ func handleLogin(sctx pbgServer.IServerContext,
     } else {
         return fasthttp.StatusCreated, sess, nil
     }
+}
+
+func handleMe(sess pbgServer.Session, _ pbgServer.IServerContext,
+               ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) (int, interface{}, error) {
+    return fasthttp.StatusOK, sess.GetUserReference(), nil
 }

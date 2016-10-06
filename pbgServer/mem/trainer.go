@@ -3,17 +3,18 @@ package mem
 import (
     "time"
     "github.com/ar3s3ru/PokemonBattleGo/pbgServer"
+    "strconv"
 )
 
 type (
     trainer struct {
-        Name string                   `json:"username"`
-        hpwd []byte                   `json:"-"`
-        Sgup time.Time                `json:"sign_up"`
+        Name string
+        hpwd []byte
+        Sgup time.Time
         // Trainer related fieds
-        set  bool                     `json:"-"`
-        Cls  pbgServer.TrainerClass   `json:"class"`
-        Tm   [6]pbgServer.PokèmonTeam `json:"team"`
+        set  bool
+        Cls  pbgServer.TrainerClass
+        Tm   [6]pbgServer.PokèmonTeam
     }
 )
 
@@ -58,4 +59,10 @@ func (t *trainer) SetTrainer(team [6]pbgServer.PokèmonTeam, class pbgServer.Tra
 func (t *trainer) UpdateTrainer(team [6]pbgServer.PokèmonTeam) error {
     // TODO: finish this
     return nil
+}
+
+// Implements the Marshaler interface for JSON mashaling
+func (t *trainer) MarshalJSON() ([]byte, error) {
+    set := strconv.FormatBool(t.set)
+    return []byte(`{"name":"` + t.Name + `","sign_up":"` + t.Sgup.String() + `","set":` + set + `}`), nil
 }

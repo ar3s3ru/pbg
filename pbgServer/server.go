@@ -5,6 +5,7 @@ import (
     "github.com/buaazp/fasthttprouter"
     "log"
     "fmt"
+    "errors"
 )
 
 type(
@@ -90,6 +91,11 @@ type(
     //
     // Callback constructor for the object that handles authorization logic used throughout the server.
     AMConstructor func(Configuration, ISessionMechanism) IAuthMechanism
+)
+
+var (
+    ErrMethodNotAllowed = errors.New(fasthttp.StatusMessage(fasthttp.StatusMethodNotAllowed))
+    ErrNotFound         = errors.New(fasthttp.StatusMessage(fasthttp.StatusNotFound))
 )
 
 /**
@@ -179,12 +185,22 @@ func (builder *pbgBuilder) Build() PBGServer {
         panic("Invalid APIResponse callback used")
     }
 
+    router := fasthttprouter.New()
+    // Method not allowed handling
+    router.MethodNotAllowed = func (ctx *fasthttp.RequestCtx) {
+        builder.apiRespons(fasthttp.StatusMethodNotAllowed, nil, ErrMethodNotAllowed, ctx)
+    }
+    // Not found handling
+    router.NotFound = func (ctx *fasthttp.RequestCtx) {
+        builder.apiRespons(fasthttp.StatusNotFound, nil, ErrNotFound, ctx)
+    }
+
     return &pbgServer{
         dataMechanism: dataMechanism,
         authMechanism: authMechanism,
         sessMechanism: sessMechanism,
         configuration: builder.config,
-        httpRouter:    fasthttprouter.New(),
+        httpRouter:    router,
         apiResponse:   builder.apiRespons,
     }
 }

@@ -10,6 +10,9 @@ import (
 const (
     CfgMovesListFile = "MOVES_LIST_FILE"
     CfgMovesIdFile   = "MOVES_ID_FILE"
+
+    APIMoveList  = APIEndpoint + "/move"
+    APIMoveEntry = APIEndpoint + "/move/:id"
 )
 
 func handleMoves(sctx pbgServer.IServerContext,

@@ -12,6 +12,17 @@ import (
     "os"
 )
 
+type (
+    apiOkResponse struct {
+        Data interface{} `json:"data"`
+    }
+
+    apiErrReponse struct {
+        Error   string `json:"error"`
+        Message string `json:"message"`
+    }
+)
+
 const (
     CfgPokèmonFile = "POKÈMON_FILE"
     CfgLayoutFile  = "LAYOUT_FILE"
@@ -25,20 +36,41 @@ func handleStatic(ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
     fasthttp.ServeFile(ctx, pth)
 }
 
+func apiResponseCallback(statusCode int, data interface{}, err error, ctx *fasthttp.RequestCtx) {
+    // If there is not an error, mashal and send data
+    if err == nil {
+        apiData := apiOkResponse{ data }
+        if resp, err := json.Marshal(apiData); err == nil {
+            fmt.Fprintln(ctx, string(resp))
+            ctx.SetStatusCode(statusCode)
+        } else {
+            statusCode = fasthttp.StatusInternalServerError
+        }
+    }
+    // If there was an error, or there wasn't an error but came up lately, send informations
+    if err != nil {
+        // Error response
+        ne := apiErrReponse{
+            Error:   err.Error(),
+            Message: fasthttp.StatusMessage(statusCode),
+        }
+        // Mashalling error response
+        if se, err := json.Marshal(ne); err != nil {
+            // What a disaster...
+            fmt.Fprintln(ctx, `{"error":"Internal Server Error","message": "That was a disaster..."}`)
+            ctx.SetStatusCode(fasthttp.StatusInternalServerError)
+        } else {
+            // Phew, we did it!
+            fmt.Fprintln(ctx, string(se))
+            ctx.SetStatusCode(statusCode)
+        }
+    }
+    // No matter what, API content is UTF-8 JSON
+    ctx.SetContentType("application/json; charset=utf-8")
+}
+
 func newConfig(port int) pbgServer.Configuration {
-    return pbgServer.NewConfig().SetHTTPPort(port).SetValue(
-        CfgPokèmonFile, "pokedb.json",
-    )//.SetValue(
-    //    CfgLayoutFile, path.Join("templates", "layout.html"),
-    //).SetValue(
-    //    CfgPokemonListFile, path.Join("templates", "pokemons.html"),
-    //).SetValue(
-    //    CfgPokemonIdFile, path.Join("templates", "pokemon_id.html"),
-    //).SetValue(
-    //    CfgMovesListFile, path.Join("templates", "moves.html"),
-    //).SetValue(
-    //    CfgMovesIdFile, path.Join("templates", "move_id.html"),
-    //)
+    return pbgServer.NewConfig().SetHTTPPort(port).SetValue(CfgPokèmonFile, "pokedb.json")
 }
 
 func getServer(port int) pbgServer.PBGServer {
@@ -62,44 +94,7 @@ func getServer(port int) pbgServer.PBGServer {
             // SM è di tipo Authority, quindi usalo come AuthMechanism
             return sm.(mem.IAuthority)
         },
-    ).UseAPIResponse(
-        func (statusCode int, data interface{}, err error, ctx *fasthttp.RequestCtx) {
-            type (
-                d struct {
-                    Data interface{} `json:"data"`
-                }
-
-                e struct {
-                    Error   string `json:"error"`
-                    Message string `json:"message"`
-                }
-            )
-
-
-            if err == nil {
-                nd := d{data}
-                if resp, err := json.Marshal(nd); err == nil {
-                    fmt.Fprintln(ctx, string(resp))
-                    ctx.SetStatusCode(statusCode)
-                } else {
-                    statusCode = fasthttp.StatusInternalServerError
-                }
-            }
-
-            if err != nil {
-                ne := e{fasthttp.StatusMessage(statusCode), err.Error()}
-                if se, err := json.Marshal(ne); err != nil {
-                    fmt.Fprintln(ctx, "{\"error\":\"Internal Server Error\",\"message\": \"That was a disaster...\"}")
-                    ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-                } else {
-                    fmt.Fprintln(ctx, string(se))
-                    ctx.SetStatusCode(statusCode)
-                }
-            }
-
-            ctx.SetContentType("application/json; charset=utf-8")
-        },
-    ).Build()
+    ).UseAPIResponse(apiResponseCallback).Build()
 }
 
 func main() {
@@ -119,25 +114,17 @@ func main() {
     srv.APIHandle(pbgServer.GET, APIPokèmonEntry, handlePokèmonId)
 
     // Funzioni per le mosse
-    srv.APIHandle(pbgServer.GET, "/moves", handleMoves)
-    srv.APIHandle(pbgServer.GET, "/move/:id", handleMoveId)
+    srv.APIHandle(pbgServer.GET, APIMoveList, handleMoves)
+    srv.APIHandle(pbgServer.GET, APIMoveEntry, handleMoveId)
 
     // File server!
     srv.Handle(pbgServer.GET, StaticPath, handleStatic)
 
     // Login e registrazione
-    srv.APIHandle(
-        pbgServer.POST, "/register", handleRegister,
-    ).APIHandle(
-        pbgServer.POST, "/login", handleLogin,
-    ).APIAuthHandle(
-        pbgServer.GET, "/me",
-        // JSON handler
-        func (sess pbgServer.Session, _ pbgServer.IServerContext,
-               ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) (int, interface{}, error) {
-            return fasthttp.StatusOK, sess.GetUserReference(), nil
-        },
-    )
+    srv.APIHandle(pbgServer.POST, APIRegister, handleRegister)
+    srv.APIHandle(pbgServer.POST, APILogin, handleLogin)
+    srv.APIAuthHandle(pbgServer.GET, APIMe, handleMe)
+
     // Avvia il server!
     srv.StartServer()
 }
