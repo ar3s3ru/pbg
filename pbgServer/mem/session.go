@@ -7,18 +7,18 @@ import (
 
 type (
     session struct {
-        user   pbgServer.Trainer
-        token  string
+        User   pbgServer.Trainer `json:"user"`
+        Token  string            `json:"token"`
         expire time.Time
     }
 )
 
 func (s *session) GetUserReference() pbgServer.Trainer {
-    return s.user
+    return s.User
 }
 
 func (s *session) GetToken() string {
-    return s.token
+    return s.Token
 }
 
 func (s *session) IsExpired() bool {

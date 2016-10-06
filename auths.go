@@ -5,8 +5,6 @@ import (
     "github.com/valyala/fasthttp"
     "github.com/buaazp/fasthttprouter"
     "encoding/json"
-    "fmt"
-    "html/template"
     "log"
 )
 
@@ -24,36 +22,24 @@ func getPostBody(postBody []byte) (user string, pass string, err error) {
     return
 }
 
-func handleGetRegister(_ pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
-    if t, err := template.ParseFiles("templates/layout.html", "templates/registration.html"); err != nil {
-        ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
-    } else if err := t.Execute(ctx, nil); err != nil {
-        ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+func handleRegister(sctx pbgServer.IServerContext,
+                     ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) (int, interface{}, error) {
+    if un, pw, err := getPostBody(ctx.PostBody()); err != nil {
+        return fasthttp.StatusInternalServerError, nil, err
+    } else if _, _, err := sctx.GetAuthMechanism().Register(un, pw); err != nil {
+        return fasthttp.StatusBadRequest, nil, err
     } else {
-        ctx.SetContentType("text/html; charset=utf-8")
+        return fasthttp.StatusCreated, "Registered", nil
     }
 }
 
-func handleRegister(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
+func handleLogin(sctx pbgServer.IServerContext,
+                 ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) (int, interface{}, error) {
     if un, pw, err := getPostBody(ctx.PostBody()); err != nil {
-        log.Printf("Using body: %s\n", ctx.PostBody())
-        ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
-    } else if u, id, err := sctx.GetAuthMechanism().Register(un, pw); err != nil {
-        ctx.Error(err.Error(), fasthttp.StatusBadRequest)
-    } else {
-        ctx.SetStatusCode(fasthttp.StatusCreated)
-        ctx.URI().SetPath(id.Hex())
-        fmt.Fprintf(ctx, "Id: %s\nRegistered: %v\n", id.Hex(), u)
-    }
-}
-
-func handleLogin(sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
-    if un, pw, err := getPostBody(ctx.PostBody()); err != nil {
-        ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+        return fasthttp.StatusInternalServerError, nil, err
     } else if sess, err := sctx.GetAuthMechanism().DoLogin(un, pw); err != nil {
-        ctx.Error(err.Error(), fasthttp.StatusBadRequest)
+        return fasthttp.StatusBadRequest, nil, err
     } else {
-        ctx.SetStatusCode(fasthttp.StatusCreated)
-        fmt.Fprintf(ctx, "Session created with token %s\n", sess.GetToken())
+        return fasthttp.StatusCreated, sess, nil
     }
 }

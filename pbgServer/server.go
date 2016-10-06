@@ -13,6 +13,8 @@ type(
         dataMechanism IDataMechanism
         authMechanism IAuthMechanism
         sessMechanism ISessionMechanism
+        // HTTP stuff ----------------------
+        apiResponse   APIResponse
         // Private fields ------------------
         configuration Configuration
         httpRouter    *fasthttprouter.Router
@@ -24,6 +26,7 @@ type(
         dmCallback DMConstructor
         amCallback AMConstructor
         smCallback SMConstructor
+        apiRespons APIResponse
     }
 
     // Interfaccia che espone le funzionalità riguardo la gestione dei dati internamente al server.
@@ -52,8 +55,7 @@ type(
     PBGServer interface {
         IServerContext
         // HTTP stuff
-        Handle(HTTPMethod, string, Handler)      PBGServer
-        AuthHandle(HTTPMethod, string, AHandler) PBGServer
+        IHTTPServer
         // Start server, of course...
         StartServer()
     }
@@ -70,6 +72,8 @@ type(
         UseDataMechanism(DMConstructor) PBGBuilder
         UseAuthMechanism(AMConstructor) PBGBuilder
         UseSessMechanism(SMConstructor) PBGBuilder
+        // API response handler
+        UseAPIResponse(APIResponse)     PBGBuilder
 
         Build() PBGServer
     }
@@ -146,6 +150,11 @@ func (builder *pbgBuilder) UseSessMechanism(callback SMConstructor) PBGBuilder {
     return builder
 }
 
+func (builder *pbgBuilder) UseAPIResponse(response APIResponse) PBGBuilder {
+    builder.apiRespons = response
+    return builder
+}
+
 // Costruisce l'oggetto PBGServer dal builder.
 // Prima di chiamare questo metodo, assicurarsi che la configurazione passata e le callback siano valide;
 // in particolare, le callback devono creare 'veri' oggetti: non possono restituire <nil> come valore di ritorno.
@@ -166,6 +175,8 @@ func (builder *pbgBuilder) Build() PBGServer {
         panic("SessMechanism not created in dedicated callback")
     } else if authMechanism = builder.amCallback(builder.config, sessMechanism); authMechanism == nil {
         panic("AuthMechanism not created in dedicated callback")
+    } else if builder.apiRespons == nil {
+        panic("Invalid APIResponse callback used")
     }
 
     return &pbgServer{
@@ -174,6 +185,7 @@ func (builder *pbgBuilder) Build() PBGServer {
         sessMechanism: sessMechanism,
         configuration: builder.config,
         httpRouter:    fasthttprouter.New(),
+        apiResponse:   builder.apiRespons,
     }
 }
 

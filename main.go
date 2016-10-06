@@ -13,59 +13,34 @@ import (
 const (
     CfgPokèmonFile = "POKÈMON_FILE"
     CfgLayoutFile  = "LAYOUT_FILE"
+
+    APIEndpoint = "/api"
+    StaticPath  = "/static"
 )
 
-func withFlavors(handlerJSON, handlerHTML pbgServer.Handler) pbgServer.Handler {
-    return func (sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
-        fmt.Println(ctx.Request.Header.String())
-        fmt.Println(string(ctx.Request.Header.Method()))
-
-        if ctx.Request.Header.HasAcceptEncoding("application/json") {
-            handlerJSON(sctx, ctx, pm)
-            ctx.SetContentType("application/json; charset=utf-8")
-        } else {
-            handlerHTML(sctx, ctx, pm)
-            ctx.SetContentType("text/html; charset=utf-8")
-        }
-    }
-}
-
-func withAuthFlavors(handlerJSON, handlerHTML pbgServer.AHandler) pbgServer.AHandler {
-    return func (sess pbgServer.Session, sctx pbgServer.IServerContext, 
-        ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
-
-        if ctx.Request.Header.HasAcceptEncoding("application/json") {
-            handlerJSON(sess, sctx, ctx, pm)
-            ctx.SetContentType("application/json; charset=utf-8")
-        } else {
-            handlerHTML(sess, sctx, ctx, pm)
-            ctx.SetContentType("text/html; charset=utf-8")
-        }
-    }
-}
-
-func handleStatic(_ pbgServer.IServerContext, ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
+func handleStatic(ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
     pth := path.Join("static", pm.ByName("resource"))
     fasthttp.ServeFile(ctx, pth)
 }
 
+func newConfig() pbgServer.Configuration {
+    return pbgServer.NewConfig().SetHTTPPort(8080).SetValue(
+        CfgPokèmonFile, "pokedb.json",
+    )//.SetValue(
+    //    CfgLayoutFile, path.Join("templates", "layout.html"),
+    //).SetValue(
+    //    CfgPokemonListFile, path.Join("templates", "pokemons.html"),
+    //).SetValue(
+    //    CfgPokemonIdFile, path.Join("templates", "pokemon_id.html"),
+    //).SetValue(
+    //    CfgMovesListFile, path.Join("templates", "moves.html"),
+    //).SetValue(
+    //    CfgMovesIdFile, path.Join("templates", "move_id.html"),
+    //)
+}
+
 func getServer() pbgServer.PBGServer {
-    return pbgServer.Builder(
-        // Configura il server
-        pbgServer.NewConfig().SetHTTPPort(8080).SetValue(
-            CfgPokèmonFile, "pokedb.json",
-        ).SetValue(
-            CfgLayoutFile, "templates/layout.html",
-        ).SetValue(
-            CfgPokemonListFile, "templates/pokemons.html",
-        ).SetValue(
-            CfgPokemonIdFile, "templates/pokemon_id.html",
-        ).SetValue(
-            CfgMovesListFile, "templates/moves.html",
-        ).SetValue(
-            CfgMovesIdFile, "templates/move_id.html",
-        ),
-    ).UseDataMechanism(
+    return pbgServer.Builder(newConfig()).UseDataMechanism(
         // Data mechanism callback
         func (cfg pbgServer.Configuration) pbgServer.IDataMechanism {
             if pokèmonFile := cfg.GetValue(CfgPokèmonFile); pokèmonFile == nil {
@@ -85,6 +60,43 @@ func getServer() pbgServer.PBGServer {
             // SM è di tipo Authority, quindi usalo come AuthMechanism
             return sm.(mem.IAuthority)
         },
+    ).UseAPIResponse(
+        func (statusCode int, data interface{}, err error, ctx *fasthttp.RequestCtx) {
+            type (
+                d struct {
+                    Data interface{} `json:"data"`
+                }
+
+                e struct {
+                    Error   string `json:"error"`
+                    Message string `json:"message"`
+                }
+            )
+
+
+            if err == nil {
+                nd := d{data}
+                if resp, err := json.Marshal(nd); err == nil {
+                    fmt.Fprintln(ctx, string(resp))
+                    ctx.SetStatusCode(statusCode)
+                } else {
+                    statusCode = fasthttp.StatusInternalServerError
+                }
+            }
+
+            if err != nil {
+                ne := e{fasthttp.StatusMessage(statusCode), err.Error()}
+                if se, err := json.Marshal(ne); err != nil {
+                    fmt.Fprintln(ctx, "{\"error\":\"Internal Server Error\",\"message\": \"That was a disaster...\"}")
+                    ctx.SetStatusCode(fasthttp.StatusInternalServerError)
+                } else {
+                    fmt.Fprintln(ctx, string(se))
+                    ctx.SetStatusCode(statusCode)
+                }
+            }
+
+            ctx.SetContentType("application/json; charset=utf-8")
+        },
     ).Build()
 }
 
@@ -93,52 +105,28 @@ func main() {
     srv := getServer()
 
     // Funzioni per i pokèmon
-    srv.Handle(
-        pbgServer.GET, "/pokemons", withFlavors(
-            // JSON handler
-            func (sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
-                pok := sctx.GetDataMechanism().GetPokèmons()
-                lel, _ := json.Marshal(pok)
-                fmt.Fprint(ctx, lel)
-            },
-            // HTML handler
-            handlePokèmons,
-        ),
-    ).Handle(
-        pbgServer.GET, "/pokemon/:id", handlePokèmonId,
-    )
+    srv.APIHandle(pbgServer.GET, APIPokèmonList, handlePokèmons)
+    srv.APIHandle(pbgServer.GET, APIPokèmonEntry, handlePokèmonId)
+
     // Funzioni per le mosse
-    srv.Handle(
-        pbgServer.GET, "/moves", handleMoves,
-    ).Handle(
-        pbgServer.GET, "/move/:id", handleMoveId,
-    )
+    srv.APIHandle(pbgServer.GET, "/moves", handleMoves)
+    srv.APIHandle(pbgServer.GET, "/move/:id", handleMoveId)
+
     // File server!
-    srv.Handle(pbgServer.GET, "/static/*resource", handleStatic)
+    srv.Handle(pbgServer.GET, StaticPath, handleStatic)
+
     // Login e registrazione
-    srv.Handle(
+    srv.APIHandle(
         pbgServer.POST, "/register", handleRegister,
-    ).Handle(
-        pbgServer.GET, "/register", handleGetRegister,
-    ).Handle(
+    ).APIHandle(
         pbgServer.POST, "/login", handleLogin,
-    ).AuthHandle(
+    ).APIAuthHandle(
         pbgServer.GET, "/me",
-        withAuthFlavors(
-            // JSON hand
-            func(sess pbgServer.Session, sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
-                lel, _ := json.Marshal(sess.GetUserReference())
-                fmt.Fprint(ctx, lel)
-            }, 
-            // HTML handler
-            func(sess pbgServer.Session, sctx pbgServer.IServerContext, ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
-                if lel, err := json.Marshal(sess.GetUserReference()); err != nil {
-                    ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
-                } else {
-                    fmt.Fprintf(ctx, "It's me, MARIO!\nNo, kidding, this: %s\n", lel)
-                }
-            },
-        ),
+        // JSON handler
+        func (sess pbgServer.Session, _ pbgServer.IServerContext,
+               ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) (int, interface{}, error) {
+            return fasthttp.StatusOK, sess.GetUserReference(), nil
+        },
     )
     // Avvia il server!
     srv.StartServer()

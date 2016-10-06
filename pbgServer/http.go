@@ -3,27 +3,38 @@ package pbgServer
 import (
     "github.com/valyala/fasthttp"
     "github.com/buaazp/fasthttprouter"
-    "log"
     "bytes"
     "encoding/base64"
+    "errors"
 )
 
 type (
+    // Interfaccia che specifica il comportamento di un server HTTP
+    IHTTPServer interface {
+        GetAPIResponse() APIResponse
+
+        Handle(HTTPMethod, string, fasthttprouter.Handle) PBGServer
+        APIHandle(HTTPMethod, string, Handler)            PBGServer
+        APIAuthHandle(HTTPMethod, string, AHandler)       PBGServer
+    }
+
     // Rappresenta i possibili metodi HTTP utilizzabili nella funzione Handle().
     //
     // Represents HTTP methods that can be used into the Handle() function.
     HTTPMethod string
 
+    APIResponse func(int, interface{}, error, *fasthttp.RequestCtx)
+
     // Funzione callback che viene chiamata dal router del server ogni qualvolta che arriva
     // una richiesta HTTP da gestire in un particolare percorso.
     //
     // Callback function called by server's router every time an HTTP request arrives and needs to be handled.
-    Handler func(IServerContext, *fasthttp.RequestCtx, fasthttprouter.Params)
+    Handler func(IServerContext, *fasthttp.RequestCtx, fasthttprouter.Params) (int, interface{}, error)
 
     // Funzione callback per la gestione di richieste HTTP autenticate.
     //
     // Callback function for authenticated HTTP requests management.
-    AHandler func(Session, IServerContext, *fasthttp.RequestCtx, fasthttprouter.Params)
+    AHandler func(Session, IServerContext, *fasthttp.RequestCtx, fasthttprouter.Params) (int, interface{}, error)
 )
 
 const (
@@ -39,6 +50,11 @@ var (
 
     authComma = []byte(":")
     authPass  = []byte("x")
+
+    // Errors
+    ErrInvalidAPIHandler     = errors.New("Invalid API handler used, <nil> value")
+    ErrInvalidAPIAuthHandler = errors.New("Invalid API authHandler used, <nil> value")
+    ErrUnauthorized          = errors.New(fasthttp.StatusMessage(fasthttp.StatusUnauthorized))
 )
 
 func basicAuth(ctx *fasthttp.RequestCtx) []byte {
@@ -54,48 +70,62 @@ func basicAuth(ctx *fasthttp.RequestCtx) []byte {
             }
         }
     }
+
     // Something went wrong
     return nil
+}
+
+func (srv *pbgServer) GetAPIResponse() APIResponse {
+    return srv.apiResponse
 }
 
 // Registra un nuovo handler per un determinato percorso e con un determinato metodo HTTP.
 //
 // Registers a new handler for a specified path, with a specified HTTP method.
-func (srv *pbgServer) Handle(method HTTPMethod, path string, handler Handler) PBGServer {
-    if (handler != nil) {
-        srv.httpRouter.Handle(string(method), path, func(ctx *fasthttp.RequestCtx, ps fasthttprouter.Params) {
-            // New handle server-specific
-            handler(srv, ctx, ps)
-            // Logging HTTP request details
-            log.Printf("[%s - %d] (%s) %s\n", ctx.Method(), ctx.Response.StatusCode(), ctx.RemoteIP(), ctx.RequestURI())
-        })
-    }
+func (srv *pbgServer) Handle(method HTTPMethod, path string, handler fasthttprouter.Handle) PBGServer {
+    // Handle
+    srv.httpRouter.Handle(string(method), path, handler)
     // Method chaining
     return srv
 }
 
-func (srv *pbgServer) AuthHandle(method HTTPMethod, path string, handler AHandler) PBGServer {
-    if handler != nil {
-        srv.Handle(method, path, func(sctx IServerContext, ctx *fasthttp.RequestCtx, ps fasthttprouter.Params) {
-            statMsg := fasthttp.StatusMessage(fasthttp.StatusUnauthorized)
+func (srv *pbgServer) APIHandle(method HTTPMethod, path string, handler Handler) PBGServer {
+    if handler == nil {
+        panic(ErrInvalidAPIHandler)
+    }
+
+    srv.httpRouter.Handle(string(method), path, func (ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
+        code, data, err := handler(srv, ctx, pm)
+        srv.GetAPIResponse()(code, data, err, ctx)
+    })
+    // Method chaining
+    return srv
+}
+
+func (srv *pbgServer) APIAuthHandle(method HTTPMethod, path string, handler AHandler) PBGServer {
+    if handler == nil {
+        panic(ErrInvalidAPIAuthHandler)
+    }
+
+    srv.APIHandle(method, path,
+        func (sctx IServerContext, ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) (int, interface{}, error) {
+            err := ErrUnauthorized
 
             if bToken := basicAuth(ctx); bToken != nil {
                 if sess, err := sctx.GetSessMechanism().GetSession(string(bToken));
-                    err == ErrSessionExpired || err == ErrSessionNotFound {
+                   err == ErrSessionExpired || err == ErrSessionNotFound {
                     // Token not valid anymore
                     sctx.GetSessMechanism().RemoveSession(string(bToken))
-                    statMsg = err.Error()
                 } else if err == nil {
-                    handler(sess, sctx, ctx, ps)
-                    return
+                    return handler(sess, sctx, ctx, pm)
                 }
             }
 
             // Request Basic Authentication otherwise
             ctx.Response.Header.Set("WWW-Authenticate", "Basic realm=Restricted")
-            ctx.Error(statMsg, fasthttp.StatusUnauthorized)
-        })
-    }
+            return fasthttp.StatusUnauthorized, nil, err
+        },
+    )
 
     return srv
 }

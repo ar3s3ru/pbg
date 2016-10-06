@@ -63,8 +63,8 @@ func (authority *memAuthority) AddSession(user pbgServer.Trainer) (pbgServer.Ses
     }
 
     sess := &session{
-        user:   user,
-        token:  uuid.NewV4().String(),
+        User:   user,
+        Token:  uuid.NewV4().String(),
         expire: time.Now().Add(30 * time.Hour), // Token dura per 30 ore
     }
 
