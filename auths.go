@@ -5,7 +5,6 @@ import (
     "github.com/valyala/fasthttp"
     "github.com/buaazp/fasthttprouter"
     "encoding/json"
-    "log"
 )
 
 func getPostBody(postBody []byte) (user string, pass string, err error) {
