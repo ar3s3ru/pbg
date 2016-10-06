@@ -28,7 +28,7 @@ const (
     CfgLayoutFile  = "LAYOUT_FILE"
 
     APIEndpoint = "/api"
-    StaticPath  = "/static"
+    StaticPath  = "/static/*resource"
 )
 
 func handleStatic(ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
