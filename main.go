@@ -8,6 +8,8 @@ import (
     "path"
     "fmt"
     "encoding/json"
+    "strconv"
+    "os"
 )
 
 const (
@@ -23,8 +25,8 @@ func handleStatic(ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
     fasthttp.ServeFile(ctx, pth)
 }
 
-func newConfig() pbgServer.Configuration {
-    return pbgServer.NewConfig().SetHTTPPort(8080).SetValue(
+func newConfig(port int) pbgServer.Configuration {
+    return pbgServer.NewConfig().SetHTTPPort(port).SetValue(
         CfgPokèmonFile, "pokedb.json",
     )//.SetValue(
     //    CfgLayoutFile, path.Join("templates", "layout.html"),
@@ -39,8 +41,8 @@ func newConfig() pbgServer.Configuration {
     //)
 }
 
-func getServer() pbgServer.PBGServer {
-    return pbgServer.Builder(newConfig()).UseDataMechanism(
+func getServer(port int) pbgServer.PBGServer {
+    return pbgServer.Builder(newConfig(port)).UseDataMechanism(
         // Data mechanism callback
         func (cfg pbgServer.Configuration) pbgServer.IDataMechanism {
             if pokèmonFile := cfg.GetValue(CfgPokèmonFile); pokèmonFile == nil {
@@ -101,8 +103,16 @@ func getServer() pbgServer.PBGServer {
 }
 
 func main() {
-    // Get server instance
-    srv := getServer()
+    var port = 8080
+    if len(os.Args) >= 2 {
+        // Get server instance
+        p, err := strconv.Atoi(os.Args[1])
+        if err == nil {
+            port = p
+        }
+    }
+
+    srv := getServer(port)
 
     // Funzioni per i pokèmon
     srv.APIHandle(pbgServer.GET, APIPokèmonList, handlePokèmons)
