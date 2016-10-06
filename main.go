@@ -32,7 +32,7 @@ const (
 )
 
 func handleStatic(ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) {
-    pth := path.Join("static", pm.ByName("resource"))
+    pth := path.Join("./static", pm.ByName("resource"))
     fasthttp.ServeFile(ctx, pth)
 }
 
