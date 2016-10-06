@@ -114,7 +114,7 @@ func main() {
     }
 
     fs := &fasthttp.FS{
-        Root:               path.Join(wd, "static"),
+        Root:               wd,
         GenerateIndexPages: true,
     }
 
