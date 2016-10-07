@@ -154,7 +154,10 @@ func main() {
     // Login e registrazione
     srv.APIHandle(pbgServer.POST, APIRegister, handleRegister)
     srv.APIHandle(pbgServer.POST, APILogin, handleLogin)
+
+    // Funzioni relative all'allenatore
     srv.APIAuthHandle(pbgServer.GET, APIMe, handleMe)
+    srv.APIAuthHandle(pbgServer.POST, APISetUp, handleSettingUp)
 
     // Avvia il server!
     srv.StartServer()

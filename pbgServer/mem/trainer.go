@@ -34,21 +34,12 @@ func (t *trainer) IsSet() bool {
     return t.set
 }
 
-func (t *trainer) GetClass() (pbgServer.TrainerClass, error) {
-    if !t.IsSet() {
-        return -1, pbgServer.ErrTrainerNotSet
-    }
-
-    return t.Cls, nil
+func (t *trainer) GetClass() pbgServer.TrainerClass {
+    return t.Cls
 }
 
-func (t *trainer) GetTeam() ([6]pbgServer.PokèmonTeam, error) {
-    if !t.IsSet() {
-        // TODO: change t.tm in nil of some sort
-        return t.Tm, pbgServer.ErrTrainerNotSet
-    }
-
-    return t.Tm, nil
+func (t *trainer) GetTeam() [6]pbgServer.PokèmonTeam {
+    return t.Tm
 }
 
 func (t *trainer) SetTrainer(team [6]pbgServer.PokèmonTeam, class pbgServer.TrainerClass) error {

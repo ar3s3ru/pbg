@@ -15,7 +15,6 @@ type logRegPostBody struct {
 const (
     APIRegister  = APIEndpoint + "/register"
     APILogin     = APIEndpoint + "/login"
-    APIMe        = APIEndpoint + "/me"
 )
 
 func getPostBody(postBody []byte) (user string, pass string, err error) {
@@ -48,9 +47,4 @@ func handleLogin(sctx pbgServer.IServerContext,
     } else {
         return fasthttp.StatusCreated, sess, nil
     }
-}
-
-func handleMe(sess pbgServer.Session, _ pbgServer.IServerContext,
-               ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) (int, interface{}, error) {
-    return fasthttp.StatusOK, sess.GetUserReference(), nil
 }

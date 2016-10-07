@@ -42,8 +42,8 @@ type (
     Trainer interface {
         User
         IsSet()    bool
-        GetClass() (TrainerClass, error)
-        GetTeam()  ([6]PokèmonTeam, error)
+        GetClass() TrainerClass
+        GetTeam()  [6]PokèmonTeam
 
         // Procedures (with error handling)
         SetTrainer([6]PokèmonTeam, TrainerClass) error
@@ -62,14 +62,11 @@ type (
         Pokèmon
         GetMoves()   [4]Move
         GetLevel()   int
-        GetNature()  Nature
-        GetAbility() Ability
+        //GetNature()  Nature
+        //GetAbility() Ability
 
         GetIVs() [6]int
-        GetIV()  int
-
         GetEVs() [6]int
-        GetEV()  int
     }
 
     // Interfaccia che rappresenta una Natura.

@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 :root {
-    --base-color:      #181312;
-    --clear-color:     #FFD6C9;
-    --mid-clear-color: #8E766E;
-    --mid-color:       #723E2E;
-    --dark-color:      #7A1F02;
+    --base-color:      #d7d7d7;
+    --clear-color:     #cac9be;
+    --mid-clear-color: #b3b3b3;
+    --mid-color:       #90908f;
+    --dark-color:      #6a6b68;
 
-    --white: #F2F2F2;
+    --accent-color:       #d80000;
+    --accent-color-mid:   #c84444;
+    --accent-color-clear: #c96a6a;
+
+    --black: #2e2e2e;
 }
 
 body {
     font-family: "Raleway", sans-serif;
     background-color: var(--base-color);
+    color: var(--black);
 }
 
 .flex-container {
@@ -42,27 +47,34 @@ body {
 
 .header {
     text-align: center;
+    background-color: var(--dark-color);
 }
 
 .header h1 {
     color: var(--clear-color);
+    background: url('/static/pokeball.png') no-repeat;
+    background-size: contain;
 }
 
 .header h4 {
-    color: var(--mid-clear-color);
+    color: var(--accent-color-clear);
 }
 
 .nav {
-    background-color: var(--mid-clear-color);
-}
-
-.nav ul {
-    list-style-type: none;
-    padding: 0;
+    background-color: var(--accent-color-mid);
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .content {
-    background-color: var(--white);
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.nav ul {
+    color: var(--clear-color);
+    list-style-type: none;
+    padding: 0;
 }
 
 .footer {
