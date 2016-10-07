@@ -6,7 +6,6 @@ import (
     "github.com/buaazp/fasthttprouter"
     "errors"
     "encoding/json"
-    "fmt"
 )
 
 type (
