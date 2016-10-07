@@ -43,12 +43,17 @@ func (t *trainer) GetTeam() [6]pbgServer.PokèmonTeam {
 }
 
 func (t *trainer) SetTrainer(team [6]pbgServer.PokèmonTeam, class pbgServer.TrainerClass) error {
-    // TODO: finish this
+    t.Tm  = team
+    t.Cls = class
+    t.set = true
+
     return nil
 }
 
 func (t *trainer) UpdateTrainer(team [6]pbgServer.PokèmonTeam) error {
-    // TODO: finish this
+    t.set = true
+    t.Tm  = team
+
     return nil
 }
 
