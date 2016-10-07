@@ -4,6 +4,7 @@ import (
     "time"
     "github.com/ar3s3ru/PokemonBattleGo/pbgServer"
     "strconv"
+    "encoding/json"
 )
 
 type (
@@ -59,6 +60,14 @@ func (t *trainer) UpdateTrainer(team [6]pbgServer.PokèmonTeam) error {
 
 // Implements the Marshaler interface for JSON mashaling
 func (t *trainer) MarshalJSON() ([]byte, error) {
-    set := strconv.FormatBool(t.set)
-    return []byte(`{"name":"` + t.Name + `","sign_up":"` + t.Sgup.String() + `","set":` + set + `}`), nil
+    set  := strconv.FormatBool(t.set)
+    base := `{"name":"` + t.Name + `","sign_up":"` + t.Sgup.String() + `","set":` + set
+
+    if !t.IsSet() {
+        return []byte(base + `}`), nil
+    } else if team, err := json.Marshal(t.GetTeam()); err != nil {
+        return nil, err
+    } else {
+        return []byte(base + `,"team":` + string(team) + `,"class":"` + t.GetClass().String() + `"}`), nil
+    }
 }
