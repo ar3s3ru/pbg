@@ -16,12 +16,12 @@ const (
 )
 
 func handleMoves(sctx pbgServer.IServerContext,
-                  ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) (int, interface{}, error) {
+                 _ *fasthttp.RequestCtx, _ fasthttprouter.Params) (int, interface{}, error) {
     return fasthttp.StatusOK, sctx.GetDataMechanism().GetMoves(), nil
 }
 
 func handleMoveId(sctx pbgServer.IServerContext,
-                   ctx *fasthttp.RequestCtx, pm fasthttprouter.Params) (int, interface{}, error) {
+                  _ *fasthttp.RequestCtx, pm fasthttprouter.Params) (int, interface{}, error) {
     // Contents
     if idx, err := strconv.Atoi(pm.ByName("id")); err != nil {
         return fasthttp.StatusBadRequest, nil, err

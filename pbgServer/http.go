@@ -13,7 +13,7 @@ type (
     IHTTPServer interface {
         GetAPIResponse() APIResponse
 
-        Handle(HTTPMethod, string, fasthttprouter.Handle) PBGServer
+        Handle(HTTPMethod, string, fasthttp.Req) PBGServer
         ServHandle(HTTPMethod, string, Handler)           PBGServer
         APIHandle(HTTPMethod, string, APIHandler)         PBGServer
         APIAuthHandle(HTTPMethod, string, APIAuthHandler) PBGServer
