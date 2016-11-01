@@ -11,11 +11,11 @@ type (
     Server interface {
         Start()
 
-        Handle(method, path string, handler fasthttp.RequestHandler)
-        AuthHandle(method, path string, handler fasthttp.RequestHandler)
+        Handle(HTTPMethod, string, fasthttp.RequestHandler)
+        AuthHandle(HTTPMethod, string, fasthttp.RequestHandler)
 
-        ApiHandle(method, path string, handler fasthttp.RequestHandler)
-        ApiAuthHandle(method, path string, handler fasthttp.RequestHandler)
+        ApiHandle(HTTPMethod, string, fasthttp.RequestHandler)
+        ApiAuthHandle(HTTPMethod, string, fasthttp.RequestHandler)
     }
 
     ServerBuilder interface {
@@ -23,16 +23,14 @@ type (
         WithDataMechanism(DataMechanism)          ServerBuilder
         WithSessionMechanism(DataMechanism)       ServerBuilder
         WithAuthorizationMechanism(DataMechanism) ServerBuilder
-
-        WithApiResponser(ApiResponser) ServerBuilder
+        WithApiResponser(ApiResponser)            ServerBuilder
         //WithLogger()                   ServerBuilder
 
         Build() Server
     }
 
     server struct {
-        apiResponser ApiResponser
-
+        apiResponser           ApiResponser
         dataMechanism          DataMechanism
         sessionMechanism       SessionMechanism
         authorizationMechanism AuthorizationMechanism
@@ -47,13 +45,34 @@ type (
 )
 
 var (
+    // Base configuration
     baseConfig = &BaseConfiguration{Port: 8080, Local: true}
+    // Check function (to show how many ways there are to declare fuctions in Go)
+    check = func(data interface{}, err error) {
+        if data == nil {
+            panic(err)
+        }
+    }
+    // Returns hostname string from Configuration
+    addressing = func(cfg Configuration) string {
+        if cfg.LocalHost() {
+            return "localhost"
+        } else {
+            return ""
+        }
+    }
 )
 
 // Builder
 func NewServerBuilder() ServerBuilder {
     return func(cfg Configuration,
                 dm DataMechanism, sm SessionMechanism, am AuthorizationMechanism, ar ApiResponser) server {
+        // Parameters needed, checking if they have legit values
+        check(cfg, ErrUnspecifiedConfig)
+        check(dm,  ErrUnspecifiedDataM)
+        check(sm,  ErrUnspecifiedSessM)
+        check(am,  ErrUnspecifiedAuthM)
+
         return &server{
             config: cfg,
             router: fasthttprouter.New(),
@@ -105,31 +124,8 @@ func (sb serverBuilder) Build() Server {
 
 // Server
 func (srv server) Start() {
-    var local string
-    if srv.config.LocalHost() {
-        local = "localhost"
-    }
-
     fasthttp.ListenAndServe(
-        fmt.Sprintf("%s:%d", local, srv.config.HTTPPort()),
+        fmt.Sprintf("%s:%d", addressing(srv.config), srv.config.HTTPPort()),
         srv.router.Handler,
-    )
-}
-
-func (srv server) Handle(method, path string, handler fasthttp.RequestHandler) {
-    srv.router.Handle(method, path, handler)
-}
-
-func (srv server) AuthHandle(method, path string, handler fasthttp.RequestHandler) {
-    srv.Handle(method, path, Adapt(handler, srv.authorizationMechanism.CheckAuthorization))
-}
-
-func (srv server) ApiHandle(method, path string, handler fasthttp.RequestHandler) {
-    srv.Handle(method, srv.config.ApiEndpoint() + path, Adapt(handler, srv.apiResponser.Writer))
-}
-
-func (srv server) ApiAuthHandle(method, path string, handler fasthttp.RequestHandler) {
-    srv.Handle(method, srv.config.ApiEndpoint() + path,
-        Adapt(handler, srv.apiResponser.Writer, srv.authorizationMechanism.CheckAuthorization),
     )
 }
