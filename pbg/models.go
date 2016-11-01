@@ -1,8 +1,9 @@
-package pbgServer
+package pbg
 
 import (
-    "fmt"
     "errors"
+    "fmt"
+    "time"
 )
 
 type (
@@ -40,7 +41,12 @@ type (
     // The Trainer is a model for the user that interacts with the server - as such, it has a composition relationship
     // with the User interface.
     Trainer interface {
-        User
+        // User fields
+        GetName()         string
+        GetPasswordHash() []byte
+        GetSignUpDate()   time.Time
+
+        // Trainer fields
         IsSet()    bool
         GetClass() TrainerClass
         GetTeam()  [6]PokèmonTeam
