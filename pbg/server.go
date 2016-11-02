@@ -14,37 +14,39 @@ type (
         Handle(HTTPMethod, string, fasthttp.RequestHandler)
         AuthHandle(HTTPMethod, string, fasthttp.RequestHandler)
 
-        ApiHandle(HTTPMethod, string, fasthttp.RequestHandler)
-        ApiAuthHandle(HTTPMethod, string, fasthttp.RequestHandler)
+        APIHandle(HTTPMethod, string, fasthttp.RequestHandler)
+        APIAuthHandle(HTTPMethod, string, fasthttp.RequestHandler)
     }
 
     ServerBuilder interface {
-        WithConfiguration(Configuration)          ServerBuilder
-        WithDataMechanism(DataMechanism)          ServerBuilder
-        WithSessionMechanism(DataMechanism)       ServerBuilder
-        WithAuthorizationMechanism(DataMechanism) ServerBuilder
-        WithApiResponser(ApiResponser)            ServerBuilder
-        //WithLogger()                   ServerBuilder
+        WithAPIResponser(APIResponser)                     ServerBuilder
+        WithConfiguration(Configuration)                   ServerBuilder
+        WithDataMechanism(DataMechanism)                   ServerBuilder
+        WithSessionMechanism(SessionMechanism)             ServerBuilder
+        WithAuthorizationMechanism(AuthorizationMechanism) ServerBuilder
+        //WithLogger()                              ServerBuilder
 
         Build() Server
     }
 
     server struct {
-        apiResponser           ApiResponser
+        apiResponser           APIResponser
         dataMechanism          DataMechanism
         sessionMechanism       SessionMechanism
         authorizationMechanism AuthorizationMechanism
 
-        config Configuration
-        router *fasthttprouter.Router
+        config                 Configuration
+        router                 *fasthttprouter.Router
     }
 
     serverBuilder func(
-        Configuration, DataMechanism, SessionMechanism, AuthorizationMechanism, ApiResponser,
-    ) server
+        Configuration, DataMechanism, SessionMechanism, AuthorizationMechanism, APIResponser,
+    ) Server
 )
 
 var (
+    // Base APIResponder is JSON
+    jsonResponder = NewJSONResponser()
     // Base configuration
     baseConfig = &BaseConfiguration{Port: 8080, Local: true}
     // Check function (to show how many ways there are to declare fuctions in Go)
@@ -65,13 +67,14 @@ var (
 
 // Builder
 func NewServerBuilder() ServerBuilder {
-    return func(cfg Configuration,
-                dm DataMechanism, sm SessionMechanism, am AuthorizationMechanism, ar ApiResponser) server {
+    return serverBuilder(func(cfg Configuration,
+                dm DataMechanism, sm SessionMechanism, am AuthorizationMechanism, ar APIResponser) Server {
         // Parameters needed, checking if they have legit values
-        check(cfg, ErrUnspecifiedConfig)
+        check(cfg, ErrInvalidConfiguration)
         check(dm,  ErrUnspecifiedDataM)
         check(sm,  ErrUnspecifiedSessM)
         check(am,  ErrUnspecifiedAuthM)
+        check(ar,  ErrInvalidAPIResponser)
 
         return &server{
             config: cfg,
@@ -80,50 +83,50 @@ func NewServerBuilder() ServerBuilder {
             dataMechanism: dm, sessionMechanism: sm, authorizationMechanism: am,
             apiResponser:  ar,
         }
-    }
+    })
 }
 
 func (sb serverBuilder) WithConfiguration(cfg Configuration) ServerBuilder {
-    return func(_ Configuration,
-                dm DataMechanism, sm SessionMechanism, am AuthorizationMechanism, ar ApiResponser) server {
+    return serverBuilder(func(_ Configuration,
+                dm DataMechanism, sm SessionMechanism, am AuthorizationMechanism, ar APIResponser) Server {
         return sb(cfg, dm, sm, am, ar)
-    }
+    })
 }
 
 func (sb serverBuilder) WithDataMechanism(dm DataMechanism) ServerBuilder {
-    return func(cfg Configuration,
-                _ DataMechanism, sm SessionMechanism, am AuthorizationMechanism, ar ApiResponser) server {
+    return serverBuilder(func(cfg Configuration,
+                _ DataMechanism, sm SessionMechanism, am AuthorizationMechanism, ar APIResponser) Server {
         return sb(cfg, dm, sm, am, ar)
-    }
+    })
 }
 
 func (sb serverBuilder) WithSessionMechanism(sm SessionMechanism) ServerBuilder {
-    return func(cfg Configuration,
-                dm DataMechanism, _ SessionMechanism, am AuthorizationMechanism, ar ApiResponser) server {
+    return serverBuilder(func(cfg Configuration,
+                dm DataMechanism, _ SessionMechanism, am AuthorizationMechanism, ar APIResponser) Server {
         return sb(cfg, dm, sm, am, ar)
-    }
+    })
 }
 
 func (sb serverBuilder) WithAuthorizationMechanism(am AuthorizationMechanism) ServerBuilder {
-    return func(cfg Configuration,
-                dm DataMechanism, sm SessionMechanism, _ AuthorizationMechanism, ar ApiResponser) server {
+    return serverBuilder(func(cfg Configuration,
+                dm DataMechanism, sm SessionMechanism, _ AuthorizationMechanism, ar APIResponser) Server {
         return sb(cfg, dm, sm, am, ar)
-    }
+    })
 }
 
-func (sb serverBuilder) WithApiResponser(ar ApiResponser) {
-    return func(cfg Configuration,
-                dm DataMechanism, sm SessionMechanism, am AuthorizationMechanism, _ ApiResponser) server {
+func (sb serverBuilder) WithAPIResponser(ar APIResponser) ServerBuilder {
+    return serverBuilder(func(cfg Configuration,
+                dm DataMechanism, sm SessionMechanism, am AuthorizationMechanism, _ APIResponser) Server {
         return sb(cfg, dm, sm, am, ar)
-    }
+    })
 }
 
 func (sb serverBuilder) Build() Server {
-    return sb(baseConfig, nil, nil, nil, nil)
+    return sb(baseConfig, nil, nil, nil, jsonResponder)
 }
 
 // Server
-func (srv server) Start() {
+func (srv *server) Start() {
     fasthttp.ListenAndServe(
         fmt.Sprintf("%s:%d", addressing(srv.config), srv.config.HTTPPort()),
         srv.router.Handler,

@@ -12,25 +12,25 @@ const (
     HEAD   HTTPMethod = "HEAD"
 )
 
-func (srv server) Handle(method HTTPMethod, path string, handler fasthttp.RequestHandler) {
+func (srv *server) Handle(method HTTPMethod, path string, handler fasthttp.RequestHandler) {
     srv.router.Handle(string(method), path, handler)
 }
 
-func (srv server) AuthHandle(method HTTPMethod, path string, handler fasthttp.RequestHandler) {
-    srv.Handle(string(method), path,
+func (srv *server) AuthHandle(method HTTPMethod, path string, handler fasthttp.RequestHandler) {
+    srv.Handle(method, path,
         Adapt(handler, srv.authorizationMechanism.CheckAuthorization),
     )
 }
 
-func (srv server) ApiHandle(method HTTPMethod, path string, handler fasthttp.RequestHandler) {
+func (srv *server) APIHandle(method HTTPMethod, path string, handler fasthttp.RequestHandler) {
     // TODO: string optimization with slices of []byte
-    srv.Handle(method, srv.config.ApiEndpoint() + path,
+    srv.Handle(method, srv.config.APIEndpoint() + path,
         Adapt(handler, srv.apiWriter),
     )
 }
 
-func (srv server) ApiAuthHandle(method HTTPMethod, path string, handler fasthttp.RequestHandler) {
-    srv.ApiHandle(method, path,
+func (srv *server) APIAuthHandle(method HTTPMethod, path string, handler fasthttp.RequestHandler) {
+    srv.APIHandle(method, path,
         Adapt(handler, srv.authorizationMechanism.CheckAuthorization),
     )
 }

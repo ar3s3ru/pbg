@@ -4,7 +4,7 @@ type (
     Configuration interface {
         HTTPPort()    int
         LocalHost()   bool
-        ApiEndpoint() string
+        APIEndpoint() string
     }
 
     BaseConfiguration struct {
@@ -22,6 +22,6 @@ func (cfg BaseConfiguration) LocalHost() bool {
     return cfg.Local
 }
 
-func (cfg BaseConfiguration) ApiEndpoint() string {
+func (cfg BaseConfiguration) APIEndpoint() string {
     return cfg.Endpoint
 }

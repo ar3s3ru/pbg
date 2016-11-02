@@ -1,25 +1,30 @@
 package pbg
 
 type (
+    PokèmonFactoryOption func(Pokèmon) error
     PokèmonFactory interface {
-        Create()                 Pokèmon
-        CreateSlice(...Pokèmon) []Pokèmon
+        Create(...PokèmonFactoryOption) (Pokèmon, error)
+        CreateSlice(...Pokèmon)         ([]Pokèmon, error)
     }
 
+    MoveFactoryOption func(Move) error
     MoveFactory interface {
-        Create()              Move
-        CreateSlice(...Move) []Move
+        Create(...MoveFactoryOption) (Move, error)
+        CreateSlice(...Move)         ([]Move, error)
     }
 
+    TrainerFactoryOption func(Trainer) error
     TrainerFactory interface {
-        Create() Trainer
+        Create(...TrainerFactoryOption) (Trainer, error)
     }
 
+    TeamFactoryOption func(PokèmonTeam) error
     TeamFactory interface {
-        Create() PokèmonTeam
+        Create(...TeamFactoryOption) (PokèmonTeam, error)
     }
 
+    SessionFactoryOption func(Session) error
     SessionFactory interface {
-        Create() Session
+        Create(...SessionFactoryOption) (Session, error)
     }
 )

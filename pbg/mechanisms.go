@@ -15,6 +15,14 @@ type (
 
         GetTrainerById(bson.ObjectId) (Trainer, error)
         GetTrainerByName(string)      (Trainer, error)
+
+        AddTrainer(string, string)   (bson.ObjectId, error)
+        RemoveTrainer(bson.ObjectId) error
+
+        GetPokèmonFactory() PokèmonFactory
+        GetMoveFactory()    MoveFactory
+        GetTrainerFactory() TrainerFactory
+        GetTeamFactory()    TeamFactory
     }
 
     AuthorizationMechanism interface {
@@ -25,6 +33,9 @@ type (
         AddSession(Trainer)   (Session, error)
         GetSession(string)    (Session, error)
         RemoveSession(string) error
+        Purge()
+
+        GetSessionFactory() SessionFactory
     }
 
     Session interface {
@@ -32,8 +43,4 @@ type (
         GetToken()         string
         IsExpired()        bool
     }
-)
-
-const (
-
 )

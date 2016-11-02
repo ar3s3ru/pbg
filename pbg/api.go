@@ -6,45 +6,45 @@ import (
 )
 
 type (
-    ApiResponser interface {
+    APIResponser interface {
         Writer(int, interface{}, interface{}) []byte
         ContentType() []byte
     }
 
-    JsonResponser func(statusCode int, data interface{}, err interface{}) []byte
+    JSONResponser func(statusCode int, data interface{}, err interface{}) []byte
 
-    JsonSuccess struct {
+    JSONSuccess struct {
         Data interface{} `json:"data"`
     }
 
-    JsonError struct {
+    JSONError struct {
         Error   string      `json:"error"`
         Message interface{} `json:"message"`
     }
 )
 
 const (
-    ApiDataKey  = "apiData"
-    ApiErrorKey = "apiError"
-
-    jsonContentType = []byte("application/json; charset=utf-8")
+    APIDataKey  = "apiData"
+    APIErrorKey = "apiError"
 )
 
-func (srv server) apiWriter(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
+var jsonContentType = []byte("application/json; charset=utf-8")
+
+func (srv *server) apiWriter(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
     return func(ctx *fasthttp.RequestCtx) {
         handler(ctx)
 
         ctx.Response.SetBody(srv.apiResponser.Writer(
             ctx.Response.StatusCode(),
-            ctx.UserValue(ApiDataKey),
-            ctx.UserValue(ApiErrorKey),
+            ctx.UserValue(APIDataKey),
+            ctx.UserValue(APIErrorKey),
         ))
 
         ctx.SetContentTypeBytes(srv.apiResponser.ContentType())
     }
 }
 
-func NewJsonResponser() JsonResponser {
+func NewJSONResponser() JSONResponser {
     return func(statusCode int, data interface{}, err interface{}) []byte {
         var (
             response []byte
@@ -52,10 +52,10 @@ func NewJsonResponser() JsonResponser {
         )
 
         if data != nil {
-            dataJson := JsonSuccess{data}
+            dataJson := JSONSuccess{data}
             response, errInt = json.Marshal(dataJson)
         } else if err != nil {
-            errJson := JsonError{fasthttp.StatusMessage(statusCode), err}
+            errJson := JSONError{fasthttp.StatusMessage(statusCode), err}
             response, errInt = json.Marshal(errJson)
         } else {
             // TODO: insert error here (se i due casi precedenti non sono validi)
@@ -69,10 +69,10 @@ func NewJsonResponser() JsonResponser {
     }
 }
 
-func (jr JsonResponser) Writer(statusCode int, data interface{}, err interface{}) []byte {
+func (jr JSONResponser) Writer(statusCode int, data interface{}, err interface{}) []byte {
     return jr(statusCode, data, err)
 }
 
-func (jr JsonResponser) ContentType() []byte {
+func (jr JSONResponser) ContentType() []byte {
     return jsonContentType
 }

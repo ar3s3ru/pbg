@@ -12,9 +12,9 @@ func createDataMechanism() pbg.DataMechanism {
 
 func createServer(cfg pbg.Configuration,
                   dm pbg.DataMechanism, sm pbg.SessionMechanism, am pbg.AuthorizationMechanism) pbg.Server {
+    // Server builder
     srvBuild := pbg.NewServerBuilder().
                 WithConfiguration(cfg).
-                WithApiResponser(pbg.NewJsonResponser()).
                 WithDataMechanism(dm).
                 WithSessionMechanism(sm).
                 WithAuthorizationMechanism(am)
@@ -26,10 +26,13 @@ func main() {
     config := pbg.BaseConfiguration{}
 
     dataMechanism := createDataMechanism()
-    //sessionMechanism := ""
-    //authorizationMechanism := ""
+    sessionMechanism := mem.NewSessionMechanism()
+    authorizationMechanism, _ := sessionMechanism.(pbg.AuthorizationMechanism)
 
-    server := createServer(config, dataMechanism, nil, nil)
+    server := createServer(
+        config, dataMechanism, sessionMechanism, authorizationMechanism,
+    )
 
+    // Start server loop
     server.Start()
 }
