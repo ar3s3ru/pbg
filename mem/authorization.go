@@ -65,10 +65,27 @@ func (sm *sessionMechanism) GetSessionFactory() pbg.SessionFactory {
     return sm.sessionFactory
 }
 
-func (sm *sessionMechanism) CheckAuthorization(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
-    return func(ctx *fasthttp.RequestCtx) {
-        handler(ctx)
+func (sm *sessionMechanism) CheckAuthorization(header []byte) (statusCode int, sess pbg.Session, err error) {
+    // Session initial value
+    sess = nil
+    // Decoding Authorization header
+    token, err := basicAuthorization(header)
+    if err == pbg.ErrInvalidAuthorizationHeader {
+        statusCode = fasthttp.StatusBadRequest
+        return
     }
+
+    // Checking session
+    if sess, err = sm.GetSession(string(token)); err == pbg.ErrSessionExpired || err == pbg.ErrSessionNotFound {
+        statusCode = fasthttp.StatusUnauthorized
+        return
+    } else if err != nil {
+        statusCode = fasthttp.StatusInternalServerError
+        return
+    }
+    // Everything went well!
+    statusCode = fasthttp.StatusOK
+    return
 }
 
 func (sm *sessionMechanism) readAuthLockedRegion(handler authLockHandler) (pbg.Session, error) {

@@ -14,14 +14,14 @@ type (
     }
 )
 
-func (cfg BaseConfiguration) HTTPPort() int {
+func (cfg *BaseConfiguration) HTTPPort() int {
     return cfg.Port
 }
 
-func (cfg BaseConfiguration) LocalHost() bool {
+func (cfg *BaseConfiguration) LocalHost() bool {
     return cfg.Local
 }
 
-func (cfg BaseConfiguration) APIEndpoint() string {
+func (cfg *BaseConfiguration) APIEndpoint() string {
     return cfg.Endpoint
 }

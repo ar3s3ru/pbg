@@ -1,9 +1,6 @@
 package pbg
 
-import (
-    "gopkg.in/mgo.v2/bson"
-    "github.com/valyala/fasthttp"
-)
+import "gopkg.in/mgo.v2/bson"
 
 type (
     DataMechanism interface {
@@ -26,7 +23,7 @@ type (
     }
 
     AuthorizationMechanism interface {
-        CheckAuthorization(fasthttp.RequestHandler) fasthttp.RequestHandler
+        CheckAuthorization([]byte) (statusCode int, session Session, err error)
     }
 
     SessionMechanism interface {

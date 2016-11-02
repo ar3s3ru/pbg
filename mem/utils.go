@@ -1,6 +1,34 @@
 package mem
 
-import "github.com/ar3s3ru/PokemonBattleGo/pbg"
+import (
+    "github.com/ar3s3ru/PokemonBattleGo/pbg"
+    "bytes"
+    "encoding/base64"
+)
+
+var (
+    authorizationPrefix = []byte("Basic ")
+    authorizationComma  = []byte(":")
+    authorizationPassw  = []byte("x")
+)
+
+func basicAuthorization(header []byte) ([]byte, error) {
+    if bytes.HasPrefix(header, authorizationPrefix) {
+        // Decode from base64 to UTF-8 string
+        payload, err := base64.StdEncoding.DecodeString(string(header[len(authorizationPrefix):]))
+        if err == nil {
+            // Splitting the payload string into "token:password"
+            pair := bytes.SplitN(payload, authorizationComma, 2)
+            // Checking password validation
+            if len(pair) == 2 && bytes.Equal(pair[1], authorizationPassw) {
+                // Returns Session token
+                return pair[0], nil
+            }
+        }
+    }
+    // Some error occurred, that means we had an invalid Authorization header
+    return nil, pbg.ErrInvalidAuthorizationHeader
+}
 
 func convertLtoML(moves []move) []pbg.Move {
     if moves == nil {

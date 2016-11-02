@@ -10,11 +10,9 @@ func createDataMechanism() pbg.DataMechanism {
     return db.Build()
 }
 
-func createServer(cfg pbg.Configuration,
-                  dm pbg.DataMechanism, sm pbg.SessionMechanism, am pbg.AuthorizationMechanism) pbg.Server {
+func createServer(dm pbg.DataMechanism, sm pbg.SessionMechanism, am pbg.AuthorizationMechanism) pbg.Server {
     // Server builder
     srvBuild := pbg.NewServerBuilder().
-                WithConfiguration(cfg).
                 WithDataMechanism(dm).
                 WithSessionMechanism(sm).
                 WithAuthorizationMechanism(am)
@@ -23,15 +21,20 @@ func createServer(cfg pbg.Configuration,
 }
 
 func main() {
-    config := pbg.BaseConfiguration{}
+    dataMechanism          := createDataMechanism()
+    sessionMechanism       := mem.NewSessionMechanism()
+    authorizationMechanism := sessionMechanism.(pbg.AuthorizationMechanism)
 
-    dataMechanism := createDataMechanism()
-    sessionMechanism := mem.NewSessionMechanism()
-    authorizationMechanism, _ := sessionMechanism.(pbg.AuthorizationMechanism)
+    server := createServer(dataMechanism, sessionMechanism, authorizationMechanism)
 
-    server := createServer(
-        config, dataMechanism, sessionMechanism, authorizationMechanism,
-    )
+    // Handle some shit here
+    server.Handle(pbg.GET, staticPath, handleStaticPath())
+    server.Handle(pbg.GET, rootPath, handleRoot)
+
+    server.APIHandle(pbg.GET, pokèmonIdPath,
+        pbg.Adapt(handlePokèmonId, server.WithDataAccess))
+    server.APIHandle(pbg.GET, pokèmonPath,
+        pbg.Adapt(handlePokèmonList, server.WithDataAccess))
 
     // Start server loop
     server.Start()

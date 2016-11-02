@@ -15,6 +15,9 @@ var (
     ErrPokèmonNotFound = errors.New("Pokèmon not found")
     ErrTrainerNotFound = errors.New("Trainer not found")
     ErrSessionNotFound = errors.New("Session not found")
+    ErrSessionExpired  = errors.New("Session has expired")
 
     ErrTrainerAlreadyExists = errors.New("Trainer already exists")
+
+    ErrInvalidAuthorizationHeader = errors.New("Invalid Authorization header (not Basic)")
 )

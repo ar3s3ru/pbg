@@ -2,6 +2,7 @@ package pbg
 
 import (
     "fmt"
+    "log"
 
     "github.com/buaazp/fasthttprouter"
     "github.com/valyala/fasthttp"
@@ -9,6 +10,7 @@ import (
 
 type (
     Server interface {
+        ServerAdapters
         Start()
 
         Handle(HTTPMethod, string, fasthttp.RequestHandler)
@@ -48,7 +50,7 @@ var (
     // Base APIResponder is JSON
     jsonResponder = NewJSONResponser()
     // Base configuration
-    baseConfig = &BaseConfiguration{Port: 8080, Local: true}
+    baseConfig = &BaseConfiguration{Port: 8080, Local: false, Endpoint: "/api"}
     // Check function (to show how many ways there are to declare fuctions in Go)
     check = func(data interface{}, err error) {
         if data == nil {
@@ -76,13 +78,21 @@ func NewServerBuilder() ServerBuilder {
         check(am,  ErrUnspecifiedAuthM)
         check(ar,  ErrInvalidAPIResponser)
 
-        return &server{
+        srv := &server{
             config: cfg,
             router: fasthttprouter.New(),
             // Module mechanisms
             dataMechanism: dm, sessionMechanism: sm, authorizationMechanism: am,
             apiResponser:  ar,
         }
+
+        // API endpoint handling
+        srv.APIHandle(GET, "/", func(ctx *fasthttp.RequestCtx) {
+            ctx.SetUserValue(APIErrorKey, "It's the API endpoint")
+            ctx.SetStatusCode(fasthttp.StatusBadRequest)
+        })
+
+        return srv
     })
 }
 
@@ -127,8 +137,10 @@ func (sb serverBuilder) Build() Server {
 
 // Server
 func (srv *server) Start() {
-    fasthttp.ListenAndServe(
-        fmt.Sprintf("%s:%d", addressing(srv.config), srv.config.HTTPPort()),
+    address := fmt.Sprintf("%s:%d", addressing(srv.config), srv.config.HTTPPort())
+    log.Printf("Serving on %s\n", address)
+    log.Fatal(fasthttp.ListenAndServe(
+        address,
         srv.router.Handler,
-    )
+    ))
 }
