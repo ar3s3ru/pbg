@@ -21,8 +21,8 @@ func adaptCheckAuth(am AuthorizationMechanism) Adapter {
         return func(ctx *fasthttp.RequestCtx) {
             statusCode, session, err := am.CheckAuthorization(ctx.Request.Header.Peek(authorizationHeader))
             if err != nil {
-                ctx.Error(err.Error(), statusCode)
                 ctx.Response.Header.Set(authenticateHeader, authenticateValue)
+                ctx.Error(err.Error(), statusCode)
                 return
             }
 
@@ -37,9 +37,8 @@ func adaptCheckAuthAPI(am AuthorizationMechanism) Adapter {
         return func(ctx *fasthttp.RequestCtx) {
             statusCode, session, err := am.CheckAuthorization(ctx.Request.Header.Peek(authorizationHeader))
             if err != nil {
-                ctx.SetUserValue(APIErrorKey, err)
-                ctx.SetStatusCode(statusCode)
                 ctx.Response.Header.Set(authenticateHeader, authenticateValue)
+                WriteAPIError(ctx, err, statusCode)
                 return
             }
 

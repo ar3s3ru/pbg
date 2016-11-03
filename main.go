@@ -1,8 +1,14 @@
 package main
 
 import (
+    "errors"
+
     "github.com/ar3s3ru/PokemonBattleGo/mem"
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
+)
+
+var (
+    ErrInHandlerConversion = errors.New("Some error occurred, contact sysadmin, please")
 )
 
 func createDataMechanism() pbg.DataMechanism {
@@ -38,9 +44,11 @@ func main() {
         pbg.Adapt(handlePokèmonList, server.WithDataAccess))
 
     server.APIHandle(pbg.POST, registratonPath,
-        pbg.Adapt(handleRegistration, server.WithDataAccess, server.WithSessionAccess))
+        pbg.Adapt(handleRegistration, server.WithDataAccess))
     server.APIHandle(pbg.POST, loginPath,
         pbg.Adapt(handleLogin, server.WithDataAccess, server.WithSessionAccess))
+
+    server.APIAuthHandle(pbg.GET, mePath, handleMePath)
 
     // Start server loop
     server.Start()

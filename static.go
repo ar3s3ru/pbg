@@ -1,9 +1,10 @@
 package main
 
 import (
-    "github.com/valyala/fasthttp"
     "os"
     "fmt"
+
+    "github.com/valyala/fasthttp"
 )
 
 const (

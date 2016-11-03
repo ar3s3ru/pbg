@@ -1,9 +1,10 @@
 package main
 
 import (
+    "strconv"
+
     "github.com/valyala/fasthttp"
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
-    "strconv"
 )
 
 const (
@@ -15,6 +16,7 @@ func handlePokèmonList(ctx *fasthttp.RequestCtx) {
     dataMechanism, ok := ctx.UserValue(pbg.DataAccessKey).(pbg.DataMechanism)
     if !ok {
         // Error here
+        pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
         return
     }
 
@@ -28,12 +30,14 @@ func handlePokèmonId(ctx *fasthttp.RequestCtx) {
     dataMechanism, ok := ctx.UserValue(pbg.DataAccessKey).(pbg.DataMechanism)
     if !ok {
         // Error here
+        pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
         return
     }
 
     strArg, ok := ctx.UserValue("id").(string)
     if !ok {
-        // Error her
+        // Error here
+        pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
         return
     }
 

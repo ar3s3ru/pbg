@@ -166,6 +166,10 @@ func (d *data) readDataLockedRegion(handler dataLockHandler) (pbg.Trainer, error
     defer d.mutex.RUnlock()
 
     tr, err := handler()
+    if err != nil {
+        return nil, err
+    }
+
     if convTr, ok := tr.(pbg.Trainer); ok {
         return convTr, err
     }
@@ -179,8 +183,12 @@ func (d *data) writeDataLockedRegion(handler dataLockHandler) (bson.ObjectId, er
     defer d.mutex.Unlock()
 
     id, err := handler()
+    if err != nil {
+        return "", err
+    }
+
     if convId, ok := id.(bson.ObjectId); ok {
-        return convId, err
+        return convId, nil
     }
 
     // Can't convert to ObjectId type, error

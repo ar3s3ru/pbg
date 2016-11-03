@@ -1,10 +1,13 @@
 package main
 
 import (
-    "github.com/valyala/fasthttp"
+    "fmt"
     "encoding/json"
-    "github.com/ar3s3ru/PokemonBattleGo/pbg"
+
     "golang.org/x/crypto/bcrypt"
+
+    "github.com/valyala/fasthttp"
+    "github.com/ar3s3ru/PokemonBattleGo/pbg"
 )
 
 type postBody struct {
@@ -37,12 +40,16 @@ func handleRegistration(ctx *fasthttp.RequestCtx) {
     dataMechanism, ok := ctx.UserValue(pbg.DataAccessKey).(pbg.DataMechanism)
     if !ok {
         // Error here
+        pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
         return
     }
 
-    switch trainer, err := dataMechanism.AddTrainer(user, pass); err {
+    switch id, err := dataMechanism.AddTrainer(user, pass); err {
     case nil:
-        pbg.WriteAPISuccess(ctx, trainer, fasthttp.StatusCreated)
+        pbg.WriteAPISuccess(ctx,
+            fmt.Sprintf("Created at %s", id.Hex()),
+            fasthttp.StatusCreated,
+        )
     case pbg.ErrTrainerAlreadyExists:
         pbg.WriteAPIError(ctx, err, fasthttp.StatusBadRequest)
     case pbg.ErrPasswordSalting:
@@ -62,12 +69,14 @@ func handleLogin(ctx *fasthttp.RequestCtx) {
     dataMechanism, ok := ctx.UserValue(pbg.DataAccessKey).(pbg.DataMechanism)
     if !ok {
         // Error here
+        pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
         return
     }
 
     sessionMechanism, ok := ctx.UserValue(pbg.SessionAccessKey).(pbg.SessionMechanism)
     if !ok {
         // Error here
+        pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
         return
     }
 
