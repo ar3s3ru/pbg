@@ -124,7 +124,7 @@ func (d *data) AddTrainer(user, pass string) (bson.ObjectId, error) {
     if _, err := d.GetTrainerByName(user); err == nil {
         return "", pbg.ErrTrainerAlreadyExists
     } else if pwd, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost); err != nil {
-        return "", err
+        return "", pbg.ErrPasswordSalting
     } else {
         return d.writeDataLockedRegion(
             d.handlerAddTrainer(

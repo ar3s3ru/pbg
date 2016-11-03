@@ -25,16 +25,22 @@ func main() {
     sessionMechanism       := mem.NewSessionMechanism()
     authorizationMechanism := sessionMechanism.(pbg.AuthorizationMechanism)
 
-    server := createServer(dataMechanism, sessionMechanism, authorizationMechanism)
+    server           := createServer(dataMechanism, sessionMechanism, authorizationMechanism)
+    handleStaticPath := getStaticDirHandler()
 
     // Handle some shit here
-    server.Handle(pbg.GET, staticPath, handleStaticPath())
+    server.Handle(pbg.GET, staticPath, handleStaticPath)
     server.Handle(pbg.GET, rootPath, handleRoot)
 
     server.APIHandle(pbg.GET, pokèmonIdPath,
         pbg.Adapt(handlePokèmonId, server.WithDataAccess))
     server.APIHandle(pbg.GET, pokèmonPath,
         pbg.Adapt(handlePokèmonList, server.WithDataAccess))
+
+    server.APIHandle(pbg.POST, registratonPath,
+        pbg.Adapt(handleRegistration, server.WithDataAccess, server.WithSessionAccess))
+    server.APIHandle(pbg.POST, loginPath,
+        pbg.Adapt(handleLogin, server.WithDataAccess, server.WithSessionAccess))
 
     // Start server loop
     server.Start()

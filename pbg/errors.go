@@ -18,6 +18,8 @@ var (
     ErrSessionExpired  = errors.New("Session has expired")
 
     ErrTrainerAlreadyExists = errors.New("Trainer already exists")
+    ErrInvalidPasswordUsed  = errors.New("Username or password are invalid")
 
+    ErrPasswordSalting            = errors.New("Password chosen cannot be used, try a different one")
     ErrInvalidAuthorizationHeader = errors.New("Invalid Authorization header (not Basic)")
 )

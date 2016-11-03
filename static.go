@@ -15,7 +15,7 @@ func handleRoot(ctx *fasthttp.RequestCtx) {
     fmt.Fprintf(ctx, "Hello, %s!", ctx.RemoteAddr())
 }
 
-func handleStaticPath() fasthttp.RequestHandler {
+func getStaticDirHandler() fasthttp.RequestHandler {
     wd, err := os.Getwd()
     if err != nil {
         panic(err)

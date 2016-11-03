@@ -39,21 +39,15 @@ func handlePokèmonId(ctx *fasthttp.RequestCtx) {
 
     id, err := strconv.Atoi(strArg)
     if err != nil {
-        pbg.WriteAPIError(ctx,
-            err, fasthttp.StatusInternalServerError,
-        )
+        pbg.WriteAPIError(ctx, err, fasthttp.StatusInternalServerError)
         return
     }
 
     pokèmon, err := dataMechanism.GetPokèmon(id)
     if err != nil {
-        pbg.WriteAPIError(ctx,
-            err, fasthttp.StatusNotFound,
-        )
+        pbg.WriteAPIError(ctx, err, fasthttp.StatusNotFound)
         return
     }
 
-    pbg.WriteAPISuccess(ctx,
-        pokèmon, fasthttp.StatusOK,
-    )
+    pbg.WriteAPISuccess(ctx, pokèmon, fasthttp.StatusOK)
 }
