@@ -49,6 +49,7 @@ func main() {
         pbg.Adapt(handleLogin, server.WithDataAccess, server.WithSessionAccess))
 
     server.APIAuthHandle(pbg.GET, mePath, handleMePath)
+    server.APIAuthHandle(pbg.POST, setupPath, handleSettingTeamUp)
 
     // Start server loop
     server.Start()

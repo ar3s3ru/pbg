@@ -39,9 +39,9 @@ func adaptTeamOption(option teamOption) pbg.TeamFactoryOption {
     }
 }
 
-func WithPokèmonReference(pokèmon pbg.Pokèmon) pbg.TeamFactoryOption {
+func WithPokèmonReference(pkmn pbg.Pokèmon) pbg.TeamFactoryOption {
     return adaptTeamOption(func(pokèmon *pokèmonTeam) error {
-        pokèmon.Pokèmon = pokèmon
+        pokèmon.Pokèmon = pkmn
         return nil
     })
 }
@@ -60,6 +60,26 @@ func WithPokèmonMoves(move1, move2, move3, move4 pbg.Move) pbg.TeamFactoryOptio
 func WithPokèmonLevel(level int) pbg.TeamFactoryOption {
     return adaptTeamOption(func(pokèmon *pokèmonTeam) error {
         pokèmon.Level = level
+        return nil
+    })
+}
+
+func WithPokèmonIVs(ivs [6]int) pbg.TeamFactoryOption {
+    return adaptTeamOption(func(pokèmon *pokèmonTeam) error {
+        for i := range pokèmon.IVs {
+            pokèmon.IVs[i] = ivs[i]
+        }
+
+        return nil
+    })
+}
+
+func WithPokèmonEVs(evs [6]int) pbg.TeamFactoryOption {
+    return adaptTeamOption(func(pokèmon *pokèmonTeam) error {
+        for i := range pokèmon.EVs {
+            pokèmon.EVs[i] = evs[i]
+        }
+
         return nil
     })
 }
