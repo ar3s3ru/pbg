@@ -8,8 +8,8 @@ import (
 )
 
 const (
-    pokèmonPath   = "/pokemon"
-    pokèmonIdPath = pokèmonPath + "/:id"
+    PokèmonPath   = "/pokemon"
+    PokèmonIdPath = PokèmonPath + "/:id"
 )
 
 func handlePokèmonList(ctx *fasthttp.RequestCtx) {

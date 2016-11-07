@@ -5,9 +5,7 @@ import (
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
 )
 
-const (
-    mePath = "/me"
-)
+const MePath = "/me"
 
 func handleMePath(ctx *fasthttp.RequestCtx) {
     session, ok := ctx.UserValue(pbg.SessionKey).(pbg.Session)

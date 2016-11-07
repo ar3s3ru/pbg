@@ -10,18 +10,22 @@ import (
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
 )
 
-type postBody struct {
+type PostBody struct {
     Username string `json:"username"`
     Password string `json:"password"`
 }
 
 const (
-    loginPath       = "/login"
-    registratonPath = "/signup"
+    LoginPath       = "/login"
+    RegistratonPath = "/signup"
 )
 
-func decodePostBody(bPostBody []byte) (user string, pass string, err error) {
-    goPostBody := postBody{}
+func EncodePostBody(postBody *PostBody) ([]byte, error) {
+    return json.Marshal(postBody)
+}
+
+func DecodePostBody(bPostBody []byte) (user string, pass string, err error) {
+    goPostBody := PostBody{}
     if err = json.Unmarshal(bPostBody, &goPostBody); err != nil {
         return
     }
@@ -31,7 +35,7 @@ func decodePostBody(bPostBody []byte) (user string, pass string, err error) {
 }
 
 func handleRegistration(ctx *fasthttp.RequestCtx) {
-    user, pass, err := decodePostBody(ctx.PostBody())
+    user, pass, err := DecodePostBody(ctx.PostBody())
     if err != nil {
         pbg.WriteAPIError(ctx, err, fasthttp.StatusInternalServerError)
         return
@@ -60,7 +64,7 @@ func handleRegistration(ctx *fasthttp.RequestCtx) {
 }
 
 func handleLogin(ctx *fasthttp.RequestCtx) {
-    user, pass, err := decodePostBody(ctx.PostBody())
+    user, pass, err := DecodePostBody(ctx.PostBody())
     if err != nil {
         pbg.WriteAPIError(ctx, err, fasthttp.StatusInternalServerError)
         return
@@ -81,7 +85,10 @@ func handleLogin(ctx *fasthttp.RequestCtx) {
     }
 
     trainer, err := dataMechanism.GetTrainerByName(user)
-    if err != nil {
+    if err == pbg.ErrTrainerNotFound {
+        pbg.WriteAPIError(ctx, err, fasthttp.StatusNotFound)
+        return
+    } else if err != nil {
         pbg.WriteAPIError(ctx, err, fasthttp.StatusBadRequest)
         return
     }

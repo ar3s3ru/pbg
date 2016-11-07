@@ -6,12 +6,15 @@ import (
 
     "github.com/buaazp/fasthttprouter"
     "github.com/valyala/fasthttp"
+    "github.com/valyala/fasthttp/fasthttputil"
 )
 
 type (
     Server interface {
         ServerAdapters
+
         Start()
+        Test(*fasthttputil.InmemoryListener)
 
         Handle(HTTPMethod, string, fasthttp.RequestHandler)
         AuthHandle(HTTPMethod, string, fasthttp.RequestHandler)
@@ -142,5 +145,11 @@ func (srv *server) Start() {
     log.Fatal(fasthttp.ListenAndServe(
         address,
         srv.router.Handler,
+    ))
+}
+
+func (srv *server) Test(ln *fasthttputil.InmemoryListener) {
+    log.Fatal(fasthttp.Serve(
+        ln, srv.router.Handler,
     ))
 }

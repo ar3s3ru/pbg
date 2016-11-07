@@ -8,8 +8,8 @@ import (
 )
 
 const (
-    staticPath = "/static/*resource"
-    rootPath   = "/"
+    StaticPath = "/static/*resource"
+    RootPath   = "/"
 )
 
 func handleRoot(ctx *fasthttp.RequestCtx) {

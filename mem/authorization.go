@@ -1,11 +1,13 @@
 package mem
 
 import (
-    "github.com/valyala/fasthttp"
-    "github.com/ar3s3ru/PokemonBattleGo/pbg"
     "sync"
-    "github.com/satori/go.uuid"
     "time"
+
+    "github.com/valyala/fasthttp"
+    "github.com/satori/go.uuid"
+
+    "github.com/ar3s3ru/PokemonBattleGo/pbg"
 )
 
 type (

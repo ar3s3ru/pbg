@@ -1,9 +1,10 @@
 package mem
 
 import (
-    "github.com/ar3s3ru/PokemonBattleGo/pbg"
     "bytes"
     "encoding/base64"
+
+    "github.com/ar3s3ru/PokemonBattleGo/pbg"
 )
 
 var (

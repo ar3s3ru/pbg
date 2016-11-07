@@ -1,7 +1,6 @@
 package pbg
 
 import (
-    "errors"
     "fmt"
     "time"
 )
@@ -175,49 +174,90 @@ const (
 var (
     // Nomi per le varie categorie
     CategoryNames = [...]string {
-        "Physique", "Special", "State",
+        "Physique",
+        "Special",
+        "State",
     }
 
     // Nomi per i vari tipi
     TypeNames = [...]string {
-        "Normal", "Fire", "Fightning", "Water", "Flying", "Grass", "Poison", "Electric", "Ground", "Psychic", "Rock",
-        "Ice", "Bug", "Dragon", "Ghost", "Dark", "Steel", "Fairy", "???",
+        "Normal",
+        "Fire",
+        "Fightning",
+        "Water",
+        "Flying",
+        "Grass",
+        "Poison",
+        "Electric",
+        "Ground",
+        "Psychic",
+        "Rock",
+        "Ice",
+        "Bug",
+        "Dragon",
+        "Ghost",
+        "Dark",
+        "Steel",
+        "Fairy",
+        "???",
     }
 
     // Nomi per le varie classi di allenatori
     ClassesNames = [...]string {
-        "Trainer", "Beauty", "Biker", "BirdKeeper", "Blackbelt", "Bug Catcher", "Burglar", "Channeler", "Cooltrainer",
-        "Cue Ball", "Engineer", "Fisherman", "Gambler", "Gentleman", "Hiker", "Trainer Jr.", "Juggler", "Lass",
-        "PokèManiac", "Psychic", "Rocker", "Rocket", "Sailor", "Scientist", "Super Nerd", "Swimmer", "Tamer",
-        "Youngster", "Chief",
+        "Trainer",
+        "Beauty",
+        "Biker",
+        "BirdKeeper",
+        "Blackbelt",
+        "Bug Catcher",
+        "Burglar",
+        "Channeler",
+        "Cooltrainer",
+        "Cue Ball",
+        "Engineer",
+        "Fisherman",
+        "Gambler",
+        "Gentleman",
+        "Hiker",
+        "Trainer Jr.",
+        "Juggler",
+        "Lass",
+        "PokèManiac",
+        "Psychic",
+        "Rocker",
+        "Rocket",
+        "Sailor",
+        "Scientist",
+        "Super Nerd",
+        "Swimmer",
+        "Tamer",
+        "Youngster",
+        "Chief",
     }
-
-    // Errori...
-    ErrTrainerNotSet = errors.New("Trainer not set!")
 )
 
 func (c Category) String() string {
     if c == Physique || c == Special || c == State {
         return CategoryNames[c]
-    } else {
-        return "Undefined"
     }
+
+    return "Undefined"
 }
 
 func (t Type) String() string {
     if t >= Normal && t <= Undefined {
         return TypeNames[t]
-    } else {
-        return "Undefined"
     }
+
+    return "Undefined"
 }
 
 func (tc TrainerClass) String() string {
     if tc >= TrainerC && tc <= Chief {
         return ClassesNames[tc]
-    } else {
-        return "Undefined"
     }
+
+    return "Undefined"
 }
 
 func (pt PokèmonType) String() string {

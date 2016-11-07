@@ -1,10 +1,12 @@
 package main
 
 import (
-    "github.com/valyala/fasthttp"
-    "github.com/ar3s3ru/PokemonBattleGo/pbg"
     "errors"
     "encoding/json"
+
+    "github.com/valyala/fasthttp"
+
+    "github.com/ar3s3ru/PokemonBattleGo/pbg"
     "github.com/ar3s3ru/PokemonBattleGo/mem"
 )
 
@@ -21,7 +23,7 @@ type (
 )
 
 const (
-    setupPath = mePath + "/setup"
+    SetupPath = MePath + "/setup"
 )
 
 var (
@@ -78,7 +80,9 @@ func handleSettingTeamUp(ctx *fasthttp.RequestCtx) {
             mem.WithPokèmonLevel(pokèmonBody.Level),
             mem.WithPokèmonIVs(pokèmonBody.IVs),
             mem.WithPokèmonEVs(pokèmonBody.EVs),
-        ); err != nil {
+        ); err == mem.ErrInvalidReferenceValue {
+            pbg.WriteAPIError(ctx, err, fasthttp.StatusInternalServerError)
+        } else if err != nil {
             pbg.WriteAPIError(ctx, err, fasthttp.StatusBadRequest)
         } else {
             team[i] = pokèmonTeam
