@@ -13,21 +13,21 @@ const (
 )
 
 func handlePokèmonList(ctx *fasthttp.RequestCtx) {
-    dataMechanism, ok := ctx.UserValue(pbg.DataAccessKey).(pbg.DataMechanism)
+    _, ok := ctx.UserValue(pbg.DataInterfaceKey).(pbg.DataInterface)
     if !ok {
         // Error here
         pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
         return
     }
 
-    pbg.WriteAPISuccess(ctx,
-        dataMechanism.ListPokèmon(),
-        fasthttp.StatusOK,
-    )
+    //pbg.WriteAPISuccess(ctx,
+    //    di.ListPokèmon(),
+    //    fasthttp.StatusOK,
+    //)
 }
 
 func handlePokèmonId(ctx *fasthttp.RequestCtx) {
-    dataMechanism, ok := ctx.UserValue(pbg.DataAccessKey).(pbg.DataMechanism)
+    di, ok := ctx.UserValue(pbg.DataInterfaceKey).(pbg.DataInterface)
     if !ok {
         // Error here
         pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
@@ -47,7 +47,7 @@ func handlePokèmonId(ctx *fasthttp.RequestCtx) {
         return
     }
 
-    pokèmon, err := dataMechanism.GetPokèmon(id)
+    pokèmon, err := di.GetPokèmon(id)
     if err != nil {
         pbg.WriteAPIError(ctx, err, fasthttp.StatusNotFound)
         return

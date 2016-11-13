@@ -2,21 +2,13 @@ package mem
 
 import "github.com/ar3s3ru/PokemonBattleGo/pbg"
 
-type teamOption  func(*pokèmonTeam) error
-type TeamFactory func()             pbg.PokèmonTeam
+type (
+    teamOption func(*pokèmonTeam) error
+)
 
-func NewTeamFactory() pbg.TeamFactory {
-    return TeamFactory(func() pbg.PokèmonTeam {
-        return &pokèmonTeam{
-            Moves: [4]pbg.Move{nil, nil, nil, nil},
-            IVs:   [6]int{0, 0, 0, 0, 0, 0},
-            EVs:   [6]int{0, 0, 0, 0, 0, 0},
-        }
-    })
-}
+func NewPokèmonTeam(options ...pbg.TeamFactoryOption) (pbg.PokèmonTeam, error) {
+    pokèmon := &pokèmonTeam{}
 
-func (tf TeamFactory) Create(options ...pbg.TeamFactoryOption) (pbg.PokèmonTeam, error) {
-    pokèmon := tf()
     for _, option := range options {
         if err := option(pokèmon); err != nil {
             return nil, err
@@ -54,10 +46,10 @@ func WithPokèmonMoves(move1, move2, move3, move4 pbg.Move) pbg.TeamFactoryOptio
             return ErrInvalidMovesValue
         }
 
-        pokèmon.Moves[0] = move1
-        pokèmon.Moves[1] = move2
-        pokèmon.Moves[2] = move3
-        pokèmon.Moves[3] = move4
+        pokèmon.Movs[0] = move1
+        pokèmon.Movs[1] = move2
+        pokèmon.Movs[2] = move3
+        pokèmon.Movs[3] = move4
 
         return nil
     })
@@ -69,7 +61,7 @@ func WithPokèmonLevel(level int) pbg.TeamFactoryOption {
             return ErrInvalidLevelValue
         }
 
-        pokèmon.Level = level
+        pokèmon.Levl = level
         return nil
     })
 }
@@ -80,8 +72,8 @@ func WithPokèmonIVs(ivs [6]int) pbg.TeamFactoryOption {
             return ErrInvalidIVsValue
         }
 
-        for i := range pokèmon.IVs {
-            pokèmon.IVs[i] = ivs[i]
+        for i := range pokèmon.Ivs {
+            pokèmon.Ivs[i] = ivs[i]
         }
 
         return nil
@@ -94,8 +86,8 @@ func WithPokèmonEVs(evs [6]int) pbg.TeamFactoryOption {
             return ErrInvalidEVsValue
         }
 
-        for i := range pokèmon.EVs {
-            pokèmon.EVs[i] = evs[i]
+        for i := range pokèmon.Evs {
+            pokèmon.Evs[i] = evs[i]
         }
 
         return nil

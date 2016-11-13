@@ -7,7 +7,7 @@ import (
     "github.com/valyala/fasthttp"
 
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
-    "github.com/ar3s3ru/PokemonBattleGo/mem"
+    //"github.com/ar3s3ru/PokemonBattleGo/mem"
 )
 
 type (
@@ -38,14 +38,14 @@ func handleSettingTeamUp(ctx *fasthttp.RequestCtx) {
         return
     }
 
-    dataMechanism, ok := ctx.UserValue(pbg.DataAccessKey).(pbg.DataMechanism)
+    dataMechanism, ok := ctx.UserValue(pbg.DataInterfaceKey).(pbg.DataInterface)
     if !ok {
         pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
         return
     }
 
-    user := session.GetUserReference()
-    if user.IsSet() {
+    user := session.Reference()
+    if user.Set() {
         pbg.WriteAPIError(ctx, ErrTrainerAlreadySetUp, fasthttp.StatusConflict)
         return
     }
@@ -56,8 +56,8 @@ func handleSettingTeamUp(ctx *fasthttp.RequestCtx) {
     }
 
     team := [6]pbg.PokèmonTeam{nil, nil, nil, nil, nil, nil}
-    for i, pokèmonBody := range body {
-        pokèmon, err := dataMechanism.GetPokèmon(pokèmonBody.Pkmn)
+    for _, pokèmonBody := range body {
+        _, err := dataMechanism.GetPokèmon(pokèmonBody.Pkmn)
         if err != nil {
             pbg.WriteAPIError(ctx, err, fasthttp.StatusNotFound)
             return
@@ -74,19 +74,19 @@ func handleSettingTeamUp(ctx *fasthttp.RequestCtx) {
             moves[i] = move
         }
 
-        if pokèmonTeam, err := dataMechanism.GetTeamFactory().Create(
-            mem.WithPokèmonReference(pokèmon),
-            mem.WithPokèmonMoves(moves[0], moves[1], moves[2], moves[3]),
-            mem.WithPokèmonLevel(pokèmonBody.Level),
-            mem.WithPokèmonIVs(pokèmonBody.IVs),
-            mem.WithPokèmonEVs(pokèmonBody.EVs),
-        ); err == mem.ErrInvalidReferenceValue {
-            pbg.WriteAPIError(ctx, err, fasthttp.StatusInternalServerError)
-        } else if err != nil {
-            pbg.WriteAPIError(ctx, err, fasthttp.StatusBadRequest)
-        } else {
-            team[i] = pokèmonTeam
-        }
+        //if pokèmonTeam, err := dataMechanism.GetTeamFactory().Create(
+        //    mem.WithPokèmonReference(pokèmon),
+        //    mem.WithPokèmonMoves(moves[0], moves[1], moves[2], moves[3]),
+        //    mem.WithPokèmonLevel(pokèmonBody.Level),
+        //    mem.WithPokèmonIVs(pokèmonBody.IVs),
+        //    mem.WithPokèmonEVs(pokèmonBody.EVs),
+        //); err == mem.ErrInvalidReferenceValue {
+        //    pbg.WriteAPIError(ctx, err, fasthttp.StatusInternalServerError)
+        //} else if err != nil {
+        //    pbg.WriteAPIError(ctx, err, fasthttp.StatusBadRequest)
+        //} else {
+        //    team[i] = pokèmonTeam
+        //}
     }
 
     if err := user.SetTrainer(team, pbg.TrainerC); err != nil {

@@ -3,39 +3,39 @@ package mem
 import "github.com/ar3s3ru/PokemonBattleGo/pbg"
 
 type move struct {
-    Name string       `json:"name"`
+    Nam  string       `json:"name"`
     Typ  pbg.Type     `json:"type"`
     Cat  pbg.Category `json:"category"`
-    PPs  int          `json:"pps"`
+    Pps  int          `json:"pps"`
     Pwr  int          `json:"power"`
     Accy int          `json:"accuracy"`
     Prio int          `json:"priority"`
 }
 
-func (m *move) GetName() string {
-    return m.Name
+func (m *move) Name() string {
+    return m.Nam
 }
 
-func (m *move) GetType() pbg.Type {
+func (m *move) Type() pbg.Type {
     return m.Typ
 }
 
-func (m *move) GetCategory() pbg.Category {
+func (m *move) Category() pbg.Category {
     return m.Cat
 }
 
-func (m *move) GetPriority() int {
+func (m *move) Priority() int {
     return m.Prio
 }
 
-func (m *move) GetPower() int {
+func (m *move) Power() int {
     return m.Pwr
 }
 
-func (m *move) GetAccuracy() int {
+func (m *move) Accuracy() int {
     return m.Accy
 }
 
-func (m *move) GetPPs() int {
-    return m.PPs
+func (m *move) PPs() int {
+    return m.Pps
 }

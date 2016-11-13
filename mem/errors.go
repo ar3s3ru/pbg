@@ -11,8 +11,14 @@ var (
 
     ErrInvalidDataSourceFile = errors.New(`Using "" as Pokèmon file is not allowed`)
 
+    ErrInvalidOperation = errors.New("Invalid operation requested")
+    ErrInvalidToken     = errors.New("Invalid Session token used")
+
     ErrTrainerConversion  = errors.New("Cannot convert interface{} to Trainer interface")
     ErrObjectIdConversion = errors.New("Cannot convert interface{} to bson.ObjectId type")
+
+    ErrInvalidMoveDataset    = errors.New("Invalid Move dataset used")
+    ErrInvalidPokèmonDataset = errors.New("Invalid Pokèmon dataset used")
 
     // PokèmonTeam factory errors
     ErrInvalidReferenceValue = errors.New("Invalid Pokèmon reference value inserted")

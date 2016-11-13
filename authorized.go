@@ -14,5 +14,5 @@ func handleMePath(ctx *fasthttp.RequestCtx) {
         return
     }
 
-    pbg.WriteAPISuccess(ctx, session.GetUserReference(), fasthttp.StatusOK)
+    pbg.WriteAPISuccess(ctx, session.Reference(), fasthttp.StatusOK)
 }

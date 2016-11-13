@@ -13,6 +13,12 @@ var (
     authorizationPassw  = []byte("x")
 )
 
+// Controlla la validità dell'header Authorization nelle richieste HTTP
+// Deve essere del tipo "(token):x", dove token è in formato UUID
+// e l'header in Base64.
+//
+// Ritorna il valore del token in []byte in caso di successo, o un errore
+// nel caso, appunto, d'errore
 func basicAuthorization(header []byte) ([]byte, error) {
     if bytes.HasPrefix(header, authorizationPrefix) {
         // Decode from base64 to UTF-8 string
@@ -31,6 +37,10 @@ func basicAuthorization(header []byte) ([]byte, error) {
     return nil, pbg.ErrInvalidAuthorizationHeader
 }
 
+// Converte uno slice di tipo mem.move (non esportato) in uno slice
+// di tipo pbg.Move (interfaccia)
+//
+// Operazione d'ordine theta(len(moves))
 func convertLtoML(moves []move) []pbg.Move {
     if moves == nil {
         panic("Must use a valid move list!")
@@ -44,23 +54,30 @@ func convertLtoML(moves []move) []pbg.Move {
     return list
 }
 
-func convertLtoPL(pkdx []pokèmon) []pbg.Pokèmon {
-    if pkdx == nil {
+// Converte uno slice di tipo mem.pokèmon (non esportato) in uno slice
+// di tipo pbg.Pokèmon (interfaccia)
+//
+// Operazione d'ordine theta(len(pokèmons))
+func convertLtoPL(pokèmons []pokèmon) []pbg.Pokèmon {
+    if pokèmons == nil {
         panic("Must use a valid pokèmon list!")
     }
 
-    list := make([]pbg.Pokèmon, len(pkdx), len(pkdx))
-    for i := range pkdx {
-        list[i] = pbg.Pokèmon(&pkdx[i])
+    list := make([]pbg.Pokèmon, len(pokèmons), len(pokèmons))
+    for i := range pokèmons {
+        list[i] = pbg.Pokèmon(&pokèmons[i])
     }
 
     return list
 }
 
+// Controlla che l'indice i sia nell'intervallo 0 < i < (upperBoud + 1)
 func inRange(i int, upperBound int) bool {
-    return i < 1 || i > upperBound
+    return i >= 1 && i <= upperBound
 }
 
+// Controlla la validità delle IVs passate per argomento
+// Ricordiamo che le IVs vanno da 0 a 31, per ogni IVs
 func checkIvs(ivs [6]int) bool {
     sum := 0
     for _, v := range ivs {
@@ -78,6 +95,9 @@ func checkIvs(ivs [6]int) bool {
     return true
 }
 
+// Controlla la validità delle EVs passate come argomento
+// Ricordiamo che le EVs hanno una somma totale di 510 e che ogni EV
+// ha un valore massimo di 255
 func checkEvs(evs [6]int) bool {
     sum := 0
     for _, v := range evs {
@@ -95,6 +115,8 @@ func checkEvs(evs [6]int) bool {
     return true
 }
 
+// Controlla la validità del livello passato come argomento
+// Ricordiamo che il livello di un pokemon si trova nell'intervallo [1, 100]
 func checkLevel(level int) bool {
     return level >= 1 && level <= 100
 }

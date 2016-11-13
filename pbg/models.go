@@ -6,30 +6,38 @@ import (
 )
 
 type (
+    // Interfaccia che rappresenta una sessione utente
+    Session interface {
+        Reference() Trainer
+        Token()     string
+        Expired()   bool
+    }
+
     // Interfaccia che rappresenta un Pokèmon.
     //
     // Interface that represent a Pokèmon.
     Pokèmon interface {
-        GetName()      string
-        GetType()      PokèmonType
-        GetPokèdex()   int
-        GetBaseStats() [6]int
+        Name()      string
+        Type()      PokèmonType
+        Index()     int
+        BaseStats() [6]int
+
         // Sprites
-        GetFrontSprite() string
-        GetBackSprite()  string
+        FrontSprite() string
+        BackSprite()  string
     }
 
     // Interfaccia che rappresenta una mossa Pokèmon.
     //
     // Interface that represents a Pokèmon move.
     Move interface {
-        GetName()     string
-        GetType()     Type
-        GetCategory() Category
-        GetPriority() int
-        GetPower()    int
-        GetAccuracy() int
-        GetPPs()      int
+        Name()     string
+        Type()     Type
+        Category() Category
+        Priority() int
+        Power()    int
+        Accuracy() int
+        PPs()      int
     }
 
     // Interfaccia che rappresenta un Allenatore Pokèmon.
@@ -41,14 +49,14 @@ type (
     // with the User interface.
     Trainer interface {
         // User fields
-        GetName()         string
-        GetPasswordHash() []byte
-        GetSignUpDate()   time.Time
+        Name()         string
+        PasswordHash() []byte
+        SignUpDate()   time.Time
 
         // Trainer fields
-        IsSet()    bool
-        GetClass() TrainerClass
-        GetTeam()  [6]PokèmonTeam
+        Set()   bool
+        Class() TrainerClass
+        Team()  [6]PokèmonTeam
 
         // Procedures (with error handling)
         SetTrainer([6]PokèmonTeam, TrainerClass) error
@@ -65,20 +73,20 @@ type (
     // a certain number of moves (from 1 to 4), a certain level, a specified Nature and Ability, IVs and EVs.
     PokèmonTeam interface {
         Pokèmon
-        GetMoves()   [4]Move
-        GetLevel()   int
+        Moves()   [4]Move
+        Level()   int
         //GetNature()  Nature
         //GetAbility() Ability
 
-        GetIVs() [6]int
-        GetEVs() [6]int
+        IVs() [6]int
+        EVs() [6]int
     }
 
     // Interfaccia che rappresenta una Natura.
     //
     // Interface that represent a Nature.
     Nature interface {
-        GetName() string
+        Name() string
         // TODO
     }
 
@@ -86,7 +94,7 @@ type (
     //
     // Interface that represent an Ability.
     Ability interface {
-        GetName() string
+        Name() string
         // TODO
     }
 

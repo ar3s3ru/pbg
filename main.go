@@ -1,94 +1,108 @@
 package main
 
 import (
+    "os"
+    "log"
+    "flag"
     "errors"
+
+    //"runtime"
+    "runtime/pprof"
 
     "github.com/ar3s3ru/PokemonBattleGo/mem"
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
+    "github.com/valyala/fasthttp"
 )
 
 var (
-    // Server
-    server pbg.Server
     // Errors
     ErrInHandlerConversion = errors.New("Some error occurred, contact sysadmin, please")
+
+    // Flags
+    httpPort = flag.Int("p", 8080, "HTTP port where the server starts listening on")
+    dataSet  = flag.String("f", "", "file to use as Pokèmon and Move dataset")
+    cpuProf  = flag.String("cpuprofile", "", "file to use as CPU profiler dump")
+    memProf  = flag.String("memprofile", "", "file to use as RAM profiler dump")
 )
 
-func createDataMechanism() pbg.DataMechanism {
-    db := mem.NewDataBuilder().WithSourceFile("pokedb.json")
-    return db.Build()
-}
+func withCPUProfile(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
+    return func(ctx *fasthttp.RequestCtx) {
+        if *cpuProf != "" {
+            f, err := os.Create(*cpuProf)
+            if err != nil {
+                panic(err)
+            }
 
-func createSessionMechanism() pbg.SessionMechanism {
-    return mem.NewSessionMechanism()
-}
+            pprof.StartCPUProfile(f)
+            defer pprof.StopCPUProfile()
+        }
 
-func createAuthorizationMechanism(sm pbg.SessionMechanism) pbg.AuthorizationMechanism {
-    if am, ok := sm.(pbg.AuthorizationMechanism); !ok {
-        panic("Invalid SessionMechanism used here")
-    } else {
-        return am
+        handler(ctx)
     }
 }
 
-func createServer(cfg pbg.Configuration, dm pbg.DataMechanism, sm pbg.SessionMechanism, am pbg.AuthorizationMechanism) {
-    // Server builder
-    srvBuild := pbg.NewServerBuilder().
-                WithDataMechanism(dm).
-                WithSessionMechanism(sm).
-                WithAuthorizationMechanism(am)
+func withMEMProfile(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
+    return func(ctx *fasthttp.RequestCtx) {
+        // Esegui prima l'handler
+        handler(ctx)
 
-    if cfg != nil {
-        srvBuild.WithConfiguration(cfg)
+        if *memProf != "" {
+            f, err := os.Create(*memProf)
+            if err != nil {
+                panic(err)
+            }
+
+            //runtime.GC()
+            pprof.WriteHeapProfile(f)
+            f.Close()
+        }
     }
-
-    server = srvBuild.Build()
 }
 
-func setupServer() {
-    server.Handle(pbg.GET, StaticPath, getStaticDirHandler())
-    server.Handle(pbg.GET, RootPath, handleRoot)
+func routing(server pbg.Server) {
+    server.GET(StaticPath, getStaticDirHandler())
+    server.GET(RootPath,   handleRoot)
 
-    server.APIHandle(pbg.GET, PokèmonIdPath,
+    server.API_GET(PokèmonIdPath,
         pbg.Adapt(handlePokèmonId, server.WithDataAccess))
-    server.APIHandle(pbg.GET, PokèmonPath,
+    server.API_GET(PokèmonPath,
         pbg.Adapt(handlePokèmonList, server.WithDataAccess))
 
-    server.APIHandle(pbg.POST, RegistratonPath,
-        pbg.Adapt(handleRegistration, server.WithDataAccess))
-    server.APIHandle(pbg.POST, LoginPath,
-        pbg.Adapt(handleLogin, server.WithDataAccess, server.WithSessionAccess))
+    server.API_POST(RegistratonPath,
+        pbg.Adapt(handleRegistration, //withMEMProfile,
+                                      server.WithLogger,
+                                      server.WithDataAccess))
+    server.API_POST(LoginPath,
+        pbg.Adapt(handleLogin, //withMEMProfile,
+                               server.WithDataAccess,
+                               server.WithSessionAccess))
 
-    server.APIAuthHandle(pbg.GET, MePath, handleMePath)
-    server.APIAuthHandle(pbg.POST, SetupPath,
+    server.API_GET(MePath, handleMePath)
+    server.API_POST(SetupPath,
         pbg.Adapt(handleSettingTeamUp, server.WithDataAccess))
 }
 
-func startSynchronous() {
-    server.Start()
-}
-
-func startAsynchronous() {
-    go server.Start()
-}
-
 func main() {
+    flag.Parse()
 
-    if server != nil {
-        panic("server already started")
-    }
-
-    sessionMechanism := createSessionMechanism()
-    createServer(
-        nil,
-        createDataMechanism(),
-        sessionMechanism,
-        createAuthorizationMechanism(sessionMechanism),
+    server := pbg.NewServer(
+        pbg.WithHTTPPort(*httpPort),
+        pbg.WithAPIResponser(pbg.NewJSONResponser()),
+        pbg.WithLogger(log.New(os.Stderr, "Server - ", log.LstdFlags)),
+        pbg.WithDataComponent(
+            mem.NewDataComponent(
+                mem.WithDatasetFile(*dataSet),
+                mem.WithDataLogger(log.New(os.Stderr, "DataComponent - ", log.LstdFlags)),
+            ),
+        ),
+        pbg.WithSessionComponent(
+            mem.NewSessionComponent(
+                mem.WithSessionLogger(log.New(os.Stderr, "SessionComponent - ", log.LstdFlags)),
+            ),
+        ),
     )
 
-    // Handle some things here
-    setupServer()
-
-    // Start server loop
-    startSynchronous()
+    routing(server)
+    // Exits only on ListenAndServe
+    server.Start()
 }

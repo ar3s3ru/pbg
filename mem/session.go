@@ -8,18 +8,18 @@ import (
 
 type session struct {
     User   pbg.Trainer `json:"user"`
-    Token  string      `json:"token"`
+    Tken  string      `json:"token"`
     expire time.Time
 }
 
-func (s *session) GetUserReference() pbg.Trainer {
+func (s *session) Reference() pbg.Trainer {
     return s.User
 }
 
-func (s *session) GetToken() string {
-    return s.Token
+func (s *session) Token() string {
+    return s.Tken
 }
 
-func (s *session) IsExpired() bool {
+func (s *session) Expired() bool {
     return time.Now().After(s.expire)
 }

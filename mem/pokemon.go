@@ -4,7 +4,7 @@ import "github.com/ar3s3ru/PokemonBattleGo/pbg"
 
 type (
     pokèmon struct {
-        Name   string          `json:"name"`
+        Nam    string          `json:"name"`
         Typ    pbg.PokèmonType `json:"type"`
         Pdn    int             `json:"pokedex"`
         Base   [6]int          `json:"baseStats"`
@@ -25,26 +25,26 @@ type (
     }
 )
 
-func (pkm *pokèmon) GetName() string {
-    return pkm.Name
+func (pkm *pokèmon) Name() string {
+    return pkm.Nam
 }
 
-func (pkm *pokèmon) GetType() pbg.PokèmonType {
+func (pkm *pokèmon) Type() pbg.PokèmonType {
     return pkm.Typ
 }
 
-func (pkm *pokèmon) GetPokèdex() int {
+func (pkm *pokèmon) Index() int {
     return pkm.Pdn
 }
 
-func (pkm *pokèmon) GetBaseStats() [6]int {
+func (pkm *pokèmon) BaseStats() [6]int {
     return pkm.Base
 }
 
-func (pkm *pokèmon) GetFrontSprite() string {
+func (pkm *pokèmon) FrontSprite() string {
     return pkm.Sprite.Front
 }
 
-func (pkm *pokèmon) GetBackSprite() string {
+func (pkm *pokèmon) BackSprite() string {
     return pkm.Sprite.Back
 }

@@ -18,27 +18,27 @@ type trainer struct {
     team   [6]pbg.PokèmonTeam
 }
 
-func (t *trainer) GetName() string {
+func (t *trainer) Name() string {
     return t.name
 }
 
-func (t *trainer) GetPasswordHash() []byte {
+func (t *trainer) PasswordHash() []byte {
     return t.hashedPass
 }
 
-func (t *trainer) GetSignUpDate() time.Time {
+func (t *trainer) SignUpDate() time.Time {
     return t.signUp
 }
 
-func (t *trainer) IsSet() bool {
+func (t *trainer) Set() bool {
     return t.setted
 }
 
-func (t *trainer) GetClass() pbg.TrainerClass {
+func (t *trainer) Class() pbg.TrainerClass {
     return t.class
 }
 
-func (t *trainer) GetTeam() [6]pbg.PokèmonTeam {
+func (t *trainer) Team() [6]pbg.PokèmonTeam {
     return t.team
 }
 
@@ -60,13 +60,13 @@ func (t *trainer) UpdateTrainer(team [6]pbg.PokèmonTeam) error {
 // Implements the Marshaler interface for JSON mashaling
 func (t *trainer) MarshalJSON() ([]byte, error) {
     set  := strconv.FormatBool(t.setted)
-    base := `{"name":"` + t.GetName() + `","sign_up":"` + t.signUp.String() + `","set":` + set
+    base := `{"name":"` + t.Name() + `","sign_up":"` + t.signUp.String() + `","set":` + set
 
-    if !t.IsSet() {
+    if !t.Set() {
         return []byte(base + `}`), nil
-    } else if team, err := json.Marshal(t.GetTeam()); err != nil {
+    } else if team, err := json.Marshal(t.Team()); err != nil {
         return nil, err
     } else {
-        return []byte(base + `,"team":` + string(team) + `,"class":"` + t.GetClass().String() + `"}`), nil
+        return []byte(base + `,"team":` + string(team) + `,"class":"` + t.Class().String() + `"}`), nil
     }
 }

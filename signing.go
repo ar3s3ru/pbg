@@ -8,6 +8,7 @@ import (
 
     "github.com/valyala/fasthttp"
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
+    "log"
 )
 
 type PostBody struct {
@@ -41,14 +42,17 @@ func handleRegistration(ctx *fasthttp.RequestCtx) {
         return
     }
 
-    dataMechanism, ok := ctx.UserValue(pbg.DataAccessKey).(pbg.DataMechanism)
+    di, ok := ctx.UserValue(pbg.DataInterfaceKey).(pbg.DataInterface)
     if !ok {
         // Error here
         pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
         return
     }
 
-    switch id, err := dataMechanism.AddTrainer(user, pass); err {
+    logger := ctx.UserValue(pbg.LoggerKey).(*log.Logger)
+    logger.Println("Adding trainer")
+
+    switch id, err := di.AddTrainer(user, pass); err {
     case nil:
         pbg.WriteAPISuccess(ctx,
             fmt.Sprintf("Created at %s", id.Hex()),
@@ -70,14 +74,14 @@ func handleLogin(ctx *fasthttp.RequestCtx) {
         return
     }
 
-    dataMechanism, ok := ctx.UserValue(pbg.DataAccessKey).(pbg.DataMechanism)
+    dataMechanism, ok := ctx.UserValue(pbg.DataInterfaceKey).(pbg.DataInterface)
     if !ok {
         // Error here
         pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
         return
     }
 
-    sessionMechanism, ok := ctx.UserValue(pbg.SessionAccessKey).(pbg.SessionMechanism)
+    sessionMechanism, ok := ctx.UserValue(pbg.SessionInterfaceKey).(pbg.SessionInterface)
     if !ok {
         // Error here
         pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
@@ -93,7 +97,7 @@ func handleLogin(ctx *fasthttp.RequestCtx) {
         return
     }
 
-    if err := bcrypt.CompareHashAndPassword([]byte(trainer.GetPasswordHash()), []byte(pass)); err != nil {
+    if err := bcrypt.CompareHashAndPassword([]byte(trainer.PasswordHash()), []byte(pass)); err != nil {
         pbg.WriteAPIError(ctx, pbg.ErrInvalidPasswordUsed, fasthttp.StatusBadRequest)
         return
     }

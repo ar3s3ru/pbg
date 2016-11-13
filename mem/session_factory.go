@@ -6,17 +6,13 @@ import (
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
 )
 
-type sessionOption  func(*session) error
-type SessionFactory func()         pbg.Session
+type (
+    sessionOption func(*session) error
+)
 
-func NewSessionFactory() pbg.SessionFactory {
-    return SessionFactory(func() pbg.Session {
-        return &session{User: nil, expire: time.Now()}
-    })
-}
+func NewSession(options ...pbg.SessionFactoryOption) (pbg.Session, error) {
+    session := &session{User: nil, expire: time.Now()}
 
-func (sf SessionFactory) Create(options ...pbg.SessionFactoryOption) (pbg.Session, error) {
-    session := sf()
     for _, option := range options {
         if err := option(session); err != nil {
             return nil, err
@@ -37,7 +33,7 @@ func adaptSessionFactoryOption(option sessionOption) pbg.SessionFactoryOption {
     }
 }
 
-func WithUserReference(user pbg.Trainer) pbg.SessionFactoryOption {
+func WithReference(user pbg.Trainer) pbg.SessionFactoryOption {
     return adaptSessionFactoryOption(func(session *session) error {
         session.User = user
         return nil
@@ -46,7 +42,7 @@ func WithUserReference(user pbg.Trainer) pbg.SessionFactoryOption {
 
 func WithToken(token string) pbg.SessionFactoryOption {
     return adaptSessionFactoryOption(func(session *session) error {
-        session.Token = token
+        session.Tken = token
         return nil
     })
 }
