@@ -8,7 +8,7 @@ import (
 
 type (
     trainerRequest func(map[bson.ObjectId]pbg.Trainer)
-    trainerDBComponent struct {
+    TrainerDBComponent struct {
         trainers map[bson.ObjectId]pbg.Trainer
         requests chan trainerRequest
         factory  pbg.TrainerFactory
@@ -16,8 +16,8 @@ type (
     }
 )
 
-func NewTrainerDBComponent(options ...pbg.TrainerDBComponentOption) pbg.TrainerDBComponent {
-    trainerdb := &trainerDBComponent{
+func NewTrainerDBComponent(options ...TrainerDBComponentOption) pbg.TrainerDBComponent {
+    trainerdb := &TrainerDBComponent{
         trainers: make(map[bson.ObjectId]pbg.Trainer),
         requests: make(chan trainerRequest),
         factory:  NewTrainer,
@@ -33,17 +33,17 @@ func NewTrainerDBComponent(options ...pbg.TrainerDBComponentOption) pbg.TrainerD
     return trainerdb
 }
 
-func (tdb *trainerDBComponent) requestDispatcher() {
+func (tdb *TrainerDBComponent) requestDispatcher() {
     for request := range tdb.requests {
         request(tdb.trainers)
     }
 }
 
-func (tdb *trainerDBComponent) Supply() pbg.TrainerDBInterface {
+func (tdb *TrainerDBComponent) Supply() pbg.TrainerDBInterface {
     return tdb
 }
 
-func (tdb *trainerDBComponent) Retrieve(_ pbg.TrainerDBInterface) {
+func (tdb *TrainerDBComponent) Retrieve(_ pbg.TrainerDBInterface) {
     // Nothing for now
 }
 

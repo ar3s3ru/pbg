@@ -6,14 +6,14 @@ import (
 )
 
 type (
-    moveDBComponent struct {
+    MoveDBComponent struct {
         moves    []pbg.Move
         logger   *log.Logger
     }
 )
 
-func NewMoveDBComponent(options ...pbg.MoveDBComponentOption) pbg.MoveDBComponent {
-    movedb := &moveDBComponent{}
+func NewMoveDBComponent(options ...MoveDBComponentOption) pbg.MoveDBComponent {
+    movedb := &MoveDBComponent{}
 
     for _, option := range options {
         if err := option(movedb); err != nil {
@@ -24,10 +24,10 @@ func NewMoveDBComponent(options ...pbg.MoveDBComponentOption) pbg.MoveDBComponen
     return movedb
 }
 
-func (mdb *moveDBComponent) Supply() pbg.MoveDBInterface {
+func (mdb *MoveDBComponent) Supply() pbg.MoveDBInterface {
     return mdb
 }
 
-func (mdb *moveDBComponent) Retrieve(_ pbg.MoveDBInterface) {
+func (mdb *MoveDBComponent) Retrieve(_ pbg.MoveDBInterface) {
     // Do nothing for now
 }

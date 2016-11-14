@@ -6,14 +6,14 @@ import (
 )
 
 type (
-    pokèmonDBComponent struct {
+    PokèmonDBComponent struct {
         pokèmons []pbg.Pokèmon
         logger   *log.Logger
     }
 )
 
 func NewPokèmonDBComponent(options ...pbg.PokèmonDBComponentOption) pbg.PokèmonDBComponent {
-    pokedb := &pokèmonDBComponent{}
+    pokedb := &PokèmonDBComponent{}
 
     for _, option := range options {
         if err := option(pokedb); err != nil {
@@ -24,10 +24,10 @@ func NewPokèmonDBComponent(options ...pbg.PokèmonDBComponentOption) pbg.Pokèm
     return pokedb
 }
 
-func (pdb *pokèmonDBComponent) Supply() pbg.PokèmonDBInterface {
+func (pdb *PokèmonDBComponent) Supply() pbg.PokèmonDBInterface {
     return pdb
 }
 
-func (pdb *pokèmonDBComponent) Retrieve(_ pbg.PokèmonDBInterface) {
+func (pdb *PokèmonDBComponent) Retrieve(_ pbg.PokèmonDBInterface) {
     // Do nothing for now
 }

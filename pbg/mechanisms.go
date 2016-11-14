@@ -18,8 +18,6 @@ type (
         Retrieve(PokèmonDBInterface)
     }
 
-    PokèmonDBComponentOption func(PokèmonDBComponent) error
-
     // Interfaccia software che permette di eseguire operazioni CRUD
     // sul DB dei Pokèmon
     PokèmonDBInterface interface {
@@ -37,8 +35,6 @@ type (
         Retrieve(MoveDBInterface)
     }
 
-    MoveDBComponentOption func(MoveDBComponent) error
-
     // Interfaccia software che permette di eseguire operazioni CRUD
     // sul DB delle Mosse
     MoveDBInterface interface {
@@ -55,8 +51,6 @@ type (
         Supply() TrainerDBInterface
         Retrieve(TrainerDBInterface)
     }
-
-    TrainerDBComponentOption func(TrainerDBComponent) error
 
     // Interfaccia software che permette di eseguire operazioni CRUD
     // sul DB degli Allenatori
@@ -81,9 +75,7 @@ type (
         // Elimina tutte le sessioni scadute dal DB
         Purge()
     }
-
-    SessionComponentOption func(SessionComponent) error
-
+    
     // Interfaccia software che permette di eseguire determinate operazioni
     // sul DB delle sessioni del server.
     SessionInterface interface {

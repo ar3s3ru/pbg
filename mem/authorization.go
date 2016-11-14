@@ -9,7 +9,7 @@ import (
 
 type (
     sessionRequest func(map[string]pbg.Session)
-    sessionComponent struct {
+    SessionDBComponent struct {
         sessions       map[string]pbg.Session
         sessionReqs    chan sessionRequest
         sessionFactory pbg.SessionFactory
@@ -19,8 +19,8 @@ type (
     }
 )
 
-func NewSessionComponent(options ...SessionComponentOption) pbg.SessionComponent {
-    sc := &sessionComponent{
+func NewSessionComponent(options ...SessionDBComponentOption) pbg.SessionComponent {
+    sc := &SessionDBComponent{
         sessions:       make(map[string]pbg.Session),
         sessionReqs:    make(chan sessionRequest),
         sessionFactory: NewSession,
@@ -39,7 +39,7 @@ func NewSessionComponent(options ...SessionComponentOption) pbg.SessionComponent
     return sc
 }
 
-func (sc *sessionComponent) sessionLoop() {
+func (sc *SessionDBComponent) sessionLoop() {
     for req := range sc.sessionReqs {
         if sc.logger != nil {
             sc.logger.Println("Received Session request", req)
@@ -49,7 +49,7 @@ func (sc *sessionComponent) sessionLoop() {
     }
 }
 
-func (sc *sessionComponent) purgingLoop() {
+func (sc *SessionDBComponent) purgingLoop() {
     for t := range time.NewTicker(sc.purgeTimer).C {
         if sc.logger != nil {
             sc.logger.Println(t, "- Executing session purging...")
@@ -59,15 +59,15 @@ func (sc *sessionComponent) purgingLoop() {
     }
 }
 
-func (sc *sessionComponent) Supply() pbg.SessionInterface {
+func (sc *SessionDBComponent) Supply() pbg.SessionInterface {
     return sc
 }
 
-func (sc *sessionComponent) Retrieve(si pbg.SessionInterface) {
+func (sc *SessionDBComponent) Retrieve(si pbg.SessionInterface) {
     // nothing...
 }
 
-func (sc *sessionComponent) Purge() {
+func (sc *SessionDBComponent) Purge() {
     sc.sessionReqs <- func(sessions map[string]pbg.Session) {
         for key, session := range sessions {
             if session.Expired() {

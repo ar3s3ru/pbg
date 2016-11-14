@@ -34,19 +34,19 @@ type (
     // RequestCtx
     //
     // Per richiederli, usare nei RequestHandler:
-    //     ```
-    //         func(ctx *fasthttp.RequestCtx) {
-    //             // Type assertion qui, ctx.UserValue() restituisce interface{}
-    //             ent, ok := ctx.UserValue(ENTITY_KEY).(Entity)
-    //             if !ok {
-    //                 // Errore!
-    //                 ...
-    //             }
     //
-    //             // Usa il valore ent
+    //     func(ctx *fasthttp.RequestCtx) {
+    //         // Type assertion qui, ctx.UserValue() restituisce interface{}
+    //         ent, ok := ctx.UserValue(ENTITY_KEY).(Entity)
+    //         if !ok {
+    //             // Errore!
     //             ...
     //         }
-    //     ```
+    //
+    //         // Usa il valore ent
+    //         ...
+    //     }
+    //
     ServerAdapters interface {
         // Fornisce l'accesso all'interfaccia Logger del server mediante RequestCtx
         // Il logger è disponibile con la chiave pbg.LoggerKey

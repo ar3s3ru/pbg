@@ -4,13 +4,13 @@ import (
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
 )
 
-func (sc *sessionComponent) Log(v ...interface{}) {
+func (sc *SessionDBComponent) Log(v ...interface{}) {
     if sc.logger != nil {
         sc.logger.Println(v...)
     }
 }
 
-func (sc *sessionComponent) GetSession(token string) (pbg.Session, error) {
+func (sc *SessionDBComponent) GetSession(token string) (pbg.Session, error) {
     resOk, resErr := make(chan pbg.Session, 1), make(chan error, 1)
     defer func() { close(resOk); close(resErr) }()
 
@@ -30,7 +30,7 @@ func (sc *sessionComponent) GetSession(token string) (pbg.Session, error) {
     }
 }
 
-func (sc *sessionComponent) AddSession(options ...pbg.SessionFactoryOption) (pbg.Session, error) {
+func (sc *SessionDBComponent) AddSession(options ...pbg.SessionFactoryOption) (pbg.Session, error) {
     sc.Log("Starting with adding new Session")
 
     session, err := sc.sessionFactory(options...)
@@ -56,7 +56,7 @@ func (sc *sessionComponent) AddSession(options ...pbg.SessionFactoryOption) (pbg
     return session, nil
 }
 
-func (sc *sessionComponent) DeleteSession(token string) error {
+func (sc *SessionDBComponent) DeleteSession(token string) error {
     if len(token) != 36 {
         return ErrInvalidToken
     }

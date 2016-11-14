@@ -10,7 +10,7 @@ type (
     synchronizedRequest func(chan<- interface{}, chan<- error, map[bson.ObjectId]pbg.Trainer)
 )
 
-func (tdb *trainerDBComponent) requestingWithReturn(req synchronizedRequest) (interface{}, error) {
+func (tdb *TrainerDBComponent) requestingWithReturn(req synchronizedRequest) (interface{}, error) {
     resOk, resErr := make(chan interface{}, 1), make(chan error, 1)
     defer func() { close(resOk); close(resErr) }()
 
@@ -26,7 +26,7 @@ func (tdb *trainerDBComponent) requestingWithReturn(req synchronizedRequest) (in
     }
 }
 
-func (tdb *trainerDBComponent) requestingGet(req synchronizedRequest) (pbg.Trainer, error) {
+func (tdb *TrainerDBComponent) requestingGet(req synchronizedRequest) (pbg.Trainer, error) {
     trainer, err := tdb.requestingWithReturn(
         func(ok chan<- interface{}, bad chan<- error, trainers map[bson.ObjectId]pbg.Trainer) {
             req(ok, bad, trainers)
@@ -40,13 +40,13 @@ func (tdb *trainerDBComponent) requestingGet(req synchronizedRequest) (pbg.Train
     }
 }
 
-func (tdb *trainerDBComponent) Log(v ...interface{}) {
+func (tdb *TrainerDBComponent) Log(v ...interface{}) {
     if tdb.logger != nil {
         tdb.logger.Println(v...)
     }
 }
 
-func (tdb *trainerDBComponent) AddTrainer(options ...pbg.TrainerFactoryOption) (bson.ObjectId, error) {
+func (tdb *TrainerDBComponent) AddTrainer(options ...pbg.TrainerFactoryOption) (bson.ObjectId, error) {
     id, err := tdb.requestingWithReturn(
         func(ok chan<- interface{}, bad chan<- error, trainers map[bson.ObjectId]pbg.Trainer) {
             trainer, err := tdb.factory(options...)
@@ -76,7 +76,7 @@ func (tdb *trainerDBComponent) AddTrainer(options ...pbg.TrainerFactoryOption) (
     }
 }
 
-func (tdb *trainerDBComponent) GetTrainerByName(name string) (pbg.Trainer, error) {
+func (tdb *TrainerDBComponent) GetTrainerByName(name string) (pbg.Trainer, error) {
     return tdb.requestingGet(
         func(ok chan<- interface{}, bad chan<- error, trainers map[bson.ObjectId]pbg.Trainer) {
             for _, trainer := range trainers {
@@ -91,7 +91,7 @@ func (tdb *trainerDBComponent) GetTrainerByName(name string) (pbg.Trainer, error
     )
 }
 
-func (tdb *trainerDBComponent) GetTrainerById(id bson.ObjectId) (pbg.Trainer, error) {
+func (tdb *TrainerDBComponent) GetTrainerById(id bson.ObjectId) (pbg.Trainer, error) {
     return tdb.requestingGet(
         func(ok chan<- interface{}, bad chan<- error, trainers map[bson.ObjectId]pbg.Trainer) {
             if trainer, found := trainers[id]; !found {
@@ -103,7 +103,7 @@ func (tdb *trainerDBComponent) GetTrainerById(id bson.ObjectId) (pbg.Trainer, er
     )
 }
 
-func (tdb *trainerDBComponent) DeleteTrainer(id bson.ObjectId) error {
+func (tdb *TrainerDBComponent) DeleteTrainer(id bson.ObjectId) error {
     _, err := tdb.requestingWithReturn(
         func(ok chan<- interface{}, bad chan<- error, trainers map[bson.ObjectId]pbg.Trainer) {
             if _, ok := trainers[id]; !ok {
