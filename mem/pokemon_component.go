@@ -12,7 +12,7 @@ type (
     }
 )
 
-func NewPokèmonDBComponent(options ...pbg.PokèmonDBComponentOption) pbg.PokèmonDBComponent {
+func NewPokèmonDBComponent(options ...PokèmonDBComponentOption) pbg.PokèmonDBComponent {
     pokedb := &PokèmonDBComponent{}
 
     for _, option := range options {

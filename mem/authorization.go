@@ -12,7 +12,7 @@ type (
     SessionDBComponent struct {
         sessions       map[string]pbg.Session
         sessionReqs    chan sessionRequest
-        sessionFactory pbg.SessionFactory
+        sessionFactory SessionFactory
 
         logger     *log.Logger
         purgeTimer time.Duration

@@ -7,11 +7,12 @@ import (
 )
 
 type (
-    sessionOption func(*session) error
+    SessionFactory func(...SessionOption) (pbg.Session, error)
+    SessionOption  func(*Session) error
 )
 
-func NewSession(options ...pbg.SessionFactoryOption) (pbg.Session, error) {
-    session := &session{User: nil, expire: time.Now()}
+func NewSession (options ...SessionOption) (pbg.Session, error) {
+    session := &Session{user: nil, expire: time.Now()}
 
     for _, option := range options {
         if err := option(session); err != nil {
@@ -22,34 +23,23 @@ func NewSession(options ...pbg.SessionFactoryOption) (pbg.Session, error) {
     return session, nil
 }
 
-func adaptSessionFactoryOption(option sessionOption) pbg.SessionFactoryOption {
-    return func(sess pbg.Session) error {
-        switch converted := sess.(type) {
-        case *session:
-            return option(converted)
-        default:
-            return ErrInvalidSessionType
-        }
+func WithReference(user pbg.Trainer) SessionOption {
+    return func(session *Session) error {
+        session.user = user
+        return nil
     }
 }
 
-func WithReference(user pbg.Trainer) pbg.SessionFactoryOption {
-    return adaptSessionFactoryOption(func(session *session) error {
-        session.User = user
+func WithToken(token string) SessionOption {
+    return func(session *Session) error {
+        session.token = token
         return nil
-    })
+    }
 }
 
-func WithToken(token string) pbg.SessionFactoryOption {
-    return adaptSessionFactoryOption(func(session *session) error {
-        session.Tken = token
-        return nil
-    })
-}
-
-func WithExpiringDate(expiring time.Time) pbg.SessionFactoryOption {
-    return adaptSessionFactoryOption(func(session *session) error {
+func WithExpiringDate(expiring time.Time) SessionOption {
+    return func(session *Session) error {
         session.expire = expiring
         return nil
-    })
+    }
 }

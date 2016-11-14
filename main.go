@@ -8,8 +8,8 @@ import (
 
     "time"
     //"runtime"
-    "syscall"
-    "os/signal"
+    //"syscall"
+    //"os/signal"
     "runtime/pprof"
 
     "github.com/ar3s3ru/PokemonBattleGo/mem"
@@ -58,21 +58,21 @@ func MEMSampling() {
 }
 
 func notifyHandling(sigCh <-chan os.Signal) {
-    for {
-        sig := <-sigCh
-        if sig == syscall.SIGUSR1 {
-            log.Println("Received SIGUSR1")
-            go CPUSampling()
-        } else if sig == syscall.SIGUSR2 {
-            log.Println("Received SIGUSR2")
-            go MEMSampling()
-        }
-    }
+    //for {
+    //    sig := <-sigCh
+    //    if sig == syscall.SIGUSR1 {
+    //        log.Println("Received SIGUSR1")
+    //        go CPUSampling()
+    //    } else if sig == syscall.SIGUSR2 {
+    //        log.Println("Received SIGUSR2")
+    //        go MEMSampling()
+    //    }
+    //}
 }
 
 func registerSignals() {
     sigCh := make(chan os.Signal, 1)
-    signal.Notify(sigCh, syscall.SIGUSR1, syscall.SIGUSR2)
+    //signal.Notify(sigCh, syscall.SIGUSR1, syscall.SIGUSR2)
 
     go notifyHandling(sigCh)
 }
