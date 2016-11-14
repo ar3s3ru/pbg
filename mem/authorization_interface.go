@@ -2,8 +2,6 @@ package mem
 
 import (
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
-    "time"
-    "github.com/satori/go.uuid"
 )
 
 func (sc *sessionComponent) Log(v ...interface{}) {
@@ -14,7 +12,7 @@ func (sc *sessionComponent) Log(v ...interface{}) {
 
 func (sc *sessionComponent) GetSession(token string) (pbg.Session, error) {
     resOk, resErr := make(chan pbg.Session, 1), make(chan error, 1)
-    func() { close(resOk); close(resErr) }()
+    defer func() { close(resOk); close(resErr) }()
 
     sc.sessionReqs <- func(sessions map[string]pbg.Session) {
         if s, ok := sessions[token]; !ok {
@@ -32,42 +30,28 @@ func (sc *sessionComponent) GetSession(token string) (pbg.Session, error) {
     }
 }
 
-func (sc *sessionComponent) AddSession(trainer pbg.Trainer) (pbg.Session, error) {
-    logger := sc.logger
-    if logger != nil {
-        logger.Println("Starting with adding new Session")
-    }
+func (sc *sessionComponent) AddSession(options ...pbg.SessionFactoryOption) (pbg.Session, error) {
+    sc.Log("Starting with adding new Session")
 
-    if trainer == nil {
-        return nil, ErrInvalidTrainerType
-    }
-
-    session, err := sc.sessionFactory(
-        WithReference(trainer),
-        WithToken(uuid.NewV4().String()),
-        WithExpiringDate(time.Now().Add(time.Hour * 30)),
-    )
-
-    if logger != nil {
-        logger.Println("Created new Session as ", session)
-    }
-
+    session, err := sc.sessionFactory(options...)
     if err != nil {
         return nil, err
     }
+
+    sc.Log("Created new Session at", session)
 
     done := make(chan interface{}, 1)
     defer close(done)
 
     sc.sessionReqs <- func(sessions map[string]pbg.Session) {
-        logger.Println("Started session Request")
+        sc.Log("Started session Request")
         sessions[session.Token()] = session
         done <- nil
     }
 
-    logger.Println("Waiting...")
+    sc.Log("Waiting...")
     <-done
-    logger.Println("Done!")
+    sc.Log("Done!")
 
     return session, nil
 }

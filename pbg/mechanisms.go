@@ -10,39 +10,63 @@ type (
         Log(...interface{})
     }
 
-    // Componente software che identifica il DB dei modelli del software
+    // Componente software che identifica il DB dei modelli Pokèmon
     // Permette di fornire un'interfaccia d'accesso al DB e di richiederla indietro
     // (utile nel caso di ObjectPools)
-    DataComponent interface {
-        // Fornisce un'interfaccia al DB dei modelli
-        Supply() DataInterface
-        // Richiede l'interfaccia fornita indietro
-        Retrieve(DataInterface)
+    PokèmonDBComponent interface {
+        Supply() PokèmonDBInterface
+        Retrieve(PokèmonDBInterface)
     }
 
-    // Interfaccia software che permette di eseguire determinate operazioni
-    // sul DB dei modelli del software.
-    DataInterface interface {
+    PokèmonDBComponentOption func(PokèmonDBComponent) error
+
+    // Interfaccia software che permette di eseguire operazioni CRUD
+    // sul DB dei Pokèmon
+    PokèmonDBInterface interface {
         Logger
 
-        // Operazioni CRUD ------------------------------------
-        // ----------------------------------------------------
+        GetPokèmon(id int) (Pokèmon, error)
+        GetPokèmons()      []Pokèmon
+    }
 
-        GetPokèmon(id int)                    (Pokèmon, error)
-        //AddPokèmon(pkm Pokèmon)               error
-        //DeletePokèmon(id int)                 error
-        //UpdatePokèmon(id int, newPkm Pokèmon) error
+    // Componente software che identifica il DB dei modelli Mosse
+    // Permette di fornire un'interfaccia d'accesso al DB e di richiederla indietro
+    // (utile nel caso di ObjectPools)
+    MoveDBComponent interface {
+        Supply() MoveDBInterface
+        Retrieve(MoveDBInterface)
+    }
 
-        GetMove(id int)                (Move, error)
-        //AddMove(mv Move)               error
-        //DeleteMove(id int)             error
-        //UpdateMove(id int, newMv Move) error
+    MoveDBComponentOption func(MoveDBComponent) error
 
-        GetTrainerByName(name string)    (Trainer, error)
-        GetTrainerById(id bson.ObjectId) (Trainer, error)
-        AddTrainer(user, pass string)    (bson.ObjectId, error)
-        DeleteTrainer(id bson.ObjectId)  error
-        //UpdateTrainer(id bson.ObjectId, newTr Trainer) error
+    // Interfaccia software che permette di eseguire operazioni CRUD
+    // sul DB delle Mosse
+    MoveDBInterface interface {
+        Logger
+
+        GetMove(id int) (Move, error)
+        GetMoves()      []Move
+    }
+
+    // Componente software che identifica il DB dei modelli Allenatori
+    // Permette di fornire un'interfaccia d'accesso al DB e di richiederla indietro
+    // (utile nel caso di ObjectPools)
+    TrainerDBComponent interface {
+        Supply() TrainerDBInterface
+        Retrieve(TrainerDBInterface)
+    }
+
+    TrainerDBComponentOption func(TrainerDBComponent) error
+
+    // Interfaccia software che permette di eseguire operazioni CRUD
+    // sul DB degli Allenatori
+    TrainerDBInterface interface {
+        Logger
+
+        AddTrainer(options ...TrainerFactoryOption) (bson.ObjectId, error)
+        GetTrainerByName(name string)               (Trainer, error)
+        GetTrainerById(id bson.ObjectId)            (Trainer, error)
+        DeleteTrainer(id bson.ObjectId)             error
     }
 
     // Componente software che identifica il DB delle sessioni del server
@@ -58,6 +82,8 @@ type (
         Purge()
     }
 
+    SessionComponentOption func(SessionComponent) error
+
     // Interfaccia software che permette di eseguire determinate operazioni
     // sul DB delle sessioni del server.
     SessionInterface interface {
@@ -66,8 +92,8 @@ type (
         // Operazioni CRUD -------------------------
         // -----------------------------------------
 
-        GetSession(token string)    (Session, error)
-        AddSession(trainer Trainer) (Session, error)
-        DeleteSession(token string) error
+        AddSession(options ...SessionFactoryOption) (Session, error)
+        GetSession(token string)                    (Session, error)
+        DeleteSession(token string)                 error
     }
 )

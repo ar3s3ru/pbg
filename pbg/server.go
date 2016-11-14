@@ -48,15 +48,21 @@ type (
     //         }
     //     ```
     ServerAdapters interface {
-        // Fornisce l'accesso al logger mediante RequestCtx
+        // Fornisce l'accesso all'interfaccia Logger del server mediante RequestCtx
         // Il logger è disponibile con la chiave pbg.LoggerKey
-        WithLogger(fasthttp.RequestHandler)        fasthttp.RequestHandler
-        // Fornisce un DataInterface mediante RequestCtx
-        // L'interfaccia è disponibile con la chiave pbg.DataInterfaceKey
-        WithDataAccess(fasthttp.RequestHandler)    fasthttp.RequestHandler
+        WithLogger(fasthttp.RequestHandler) fasthttp.RequestHandler
+        // Fornisce interfaccia al DB delle mosse mediante RequestCtx
+        // L'interfaccia è disponibile con la chiave pbg.MoveDBInterfaceKey
+        WithMoveDBAccess(fasthttp.RequestHandler) fasthttp.RequestHandler
+        // Fornisce interfaccia al DB dei Pokèmon mediante RequestCtx
+        // L'interfaccia è disponibile con la chiave pbg.PokèmonDBInterfaceKey
+        WithPokèmonDBAccess(fasthttp.RequestHandler) fasthttp.RequestHandler
+        // Fornisce interfaccia al DB degli allenatori mediante RequestCtx
+        // L'interfaccia è disponibile con la chiave pbg.TrainerDBInterfaceKey
+        WithTrainerDBAccess(fasthttp.RequestHandler) fasthttp.RequestHandler
         // Fornisce un SessionInterface mediante RequestCtx
-        // L'interfaccia è disponibile con la chiave pbg.SessionInterfaceKey
-        WithSessionAccess(fasthttp.RequestHandler) fasthttp.RequestHandler
+        // L'interfaccia è disponibile con la chiave pbg.SessionDBInterfaceKey
+        WithSessionDBAccess(fasthttp.RequestHandler) fasthttp.RequestHandler
     }
 
     // Un Server del framework pbg ha la possibilità di utilizzare un Logger,
@@ -76,10 +82,13 @@ type (
         logger *log.Logger             // Logger
         router *fasthttprouter.Router  // HTTP router
 
-        apiEndpoint      string            // Endpoint dell'API server
-        apiResponser     APIResponser      // Traduttore per le richieste API
-        dataComponent    DataComponent     // Riferimento al componente software del Models DB
-        sessionComponent SessionComponent  // Riferimento al componente software del Sessions DB
+        apiEndpoint  string            // Endpoint dell'API server
+        apiResponser APIResponser      // Traduttore per le richieste API
+
+        pokèmonDB PokèmonDBComponent // Riferimento al componente software del Models DB
+        moveDB    MoveDBComponent    //
+        trainerDB TrainerDBComponent //
+        sessionDB SessionComponent   // Riferimento al componente software del Sessions DB
     }
 )
 
@@ -115,9 +124,10 @@ func NewServer(options ...ServerOption) Server {
     }
 
     // Check needed parameters
-    check(srv.apiResponser,     ErrInvalidAPIResponser)
-    check(srv.dataComponent,    ErrInvalidDataComponent)
-    check(srv.sessionComponent, ErrInvalidSessionComponent)
+    check(srv.apiResponser, ErrInvalidAPIResponser)
+    check(srv.moveDB,       ErrInvalidMoveDBComponent)
+    check(srv.pokèmonDB,    ErrInvalidPokèmonDBComponent)
+    check(srv.sessionDB,    ErrInvalidSessionComponent)
 
     return srv
 }
@@ -183,22 +193,42 @@ func (srv *server) WithLogger(handler fasthttp.RequestHandler) fasthttp.RequestH
     }
 }
 
-func (srv *server) WithDataAccess(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
+func (srv *server) WithMoveDBAccess(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
     return func(ctx *fasthttp.RequestCtx) {
-        dataInterface := srv.dataComponent.Supply()
-        defer srv.dataComponent.Retrieve(dataInterface)
+        dataInterface := srv.moveDB.Supply()
+        defer srv.moveDB.Retrieve(dataInterface)
 
-        ctx.SetUserValue(DataInterfaceKey, dataInterface)
+        ctx.SetUserValue(MoveDBInterfaceKey, dataInterface)
         handler(ctx)
     }
 }
 
-func (srv *server) WithSessionAccess(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
+func (srv *server) WithPokèmonDBAccess(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
     return func(ctx *fasthttp.RequestCtx) {
-        sessionInterface := srv.sessionComponent.Supply()
-        defer srv.sessionComponent.Retrieve(sessionInterface)
+        dataInterface := srv.pokèmonDB.Supply()
+        defer srv.pokèmonDB.Retrieve(dataInterface)
 
-        ctx.SetUserValue(SessionInterfaceKey, sessionInterface)
+        ctx.SetUserValue(PokèmonDBInterfaceKey, dataInterface)
+        handler(ctx)
+    }
+}
+
+func (srv *server) WithTrainerDBAccess(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
+    return func(ctx *fasthttp.RequestCtx) {
+        dataInterface := srv.trainerDB.Supply()
+        defer srv.trainerDB.Retrieve(dataInterface)
+
+        ctx.SetUserValue(TrainerDBInterfaceKey, dataInterface)
+        handler(ctx)
+    }
+}
+
+func (srv *server) WithSessionDBAccess(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
+    return func(ctx *fasthttp.RequestCtx) {
+        sessionInterface := srv.sessionDB.Supply()
+        defer srv.sessionDB.Retrieve(sessionInterface)
+
+        ctx.SetUserValue(SessionDBInterfaceKey, sessionInterface)
         handler(ctx)
     }
 }

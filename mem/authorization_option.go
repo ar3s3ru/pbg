@@ -1,8 +1,10 @@
 package mem
 
 import (
-    "github.com/ar3s3ru/PokemonBattleGo/pbg"
     "log"
+    "time"
+
+    "github.com/ar3s3ru/PokemonBattleGo/pbg"
 )
 
 type (
@@ -20,9 +22,16 @@ func adaptSessionComponentOption(option sessionComponentOption) SessionComponent
     }
 }
 
-func WithSessionLogger(logger *log.Logger) SessionComponentOption {
+func WithSessionDBLogger(logger *log.Logger) SessionComponentOption {
     return adaptSessionComponentOption(func(sc *sessionComponent) error {
         sc.logger = logger
+        return nil
+    })
+}
+
+func WithPurgeTime(time time.Duration) SessionComponentOption {
+    return adaptSessionComponentOption(func(sc *sessionComponent) error {
+        sc.purgeTimer = time
         return nil
     })
 }

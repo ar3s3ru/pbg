@@ -96,26 +96,50 @@ func WithLogger(logger *log.Logger) ServerOption {
     })
 }
 
-// Specifica il DataComponent che il Server deve usare
-func WithDataComponent(dc DataComponent) ServerOption {
+// Specifica il MoveDBComponent che il Server deve usare
+func WithMoveDBComponent(mdb MoveDBComponent) ServerOption {
     return adaptServerOption(func(srv *server) error {
-        if dc == nil {
-            return ErrInvalidDataComponent
+        if mdb == nil {
+            return ErrInvalidMoveDBComponent
         }
 
-        srv.dataComponent = dc
+        srv.moveDB = mdb
+        return nil
+    })
+}
+
+// Specifica il MoveDBComponent che il Server deve usare
+func WithPokèmonDBComponent(pdb PokèmonDBComponent) ServerOption {
+    return adaptServerOption(func(srv *server) error {
+        if pdb == nil {
+            return ErrInvalidMoveDBComponent
+        }
+
+        srv.pokèmonDB = pdb
+        return nil
+    })
+}
+
+// Specifica il MoveDBComponent che il Server deve usare
+func WithTrainerDBComponent(tdb TrainerDBComponent) ServerOption {
+    return adaptServerOption(func(srv *server) error {
+        if tdb == nil {
+            return ErrInvalidMoveDBComponent
+        }
+
+        srv.trainerDB = tdb
         return nil
     })
 }
 
 // Specifica il SessionComponent che il Server deve usare
-func WithSessionComponent(sc SessionComponent) ServerOption {
+func WithSessionDBComponent(sc SessionComponent) ServerOption {
     return adaptServerOption(func(srv *server) error {
         if sc == nil {
             return ErrInvalidSessionComponent
         }
 
-        srv.sessionComponent = sc
+        srv.sessionDB = sc
         return nil
     })
 }

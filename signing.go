@@ -9,6 +9,9 @@ import (
     "github.com/valyala/fasthttp"
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
     "log"
+    "github.com/ar3s3ru/PokemonBattleGo/mem"
+    "github.com/satori/go.uuid"
+    "time"
 )
 
 type PostBody struct {
@@ -42,7 +45,7 @@ func handleRegistration(ctx *fasthttp.RequestCtx) {
         return
     }
 
-    di, ok := ctx.UserValue(pbg.DataInterfaceKey).(pbg.DataInterface)
+    trainerDB, ok := ctx.UserValue(pbg.TrainerDBInterfaceKey).(pbg.TrainerDBInterface)
     if !ok {
         // Error here
         pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
@@ -52,7 +55,7 @@ func handleRegistration(ctx *fasthttp.RequestCtx) {
     logger := ctx.UserValue(pbg.LoggerKey).(*log.Logger)
     logger.Println("Adding trainer")
 
-    switch id, err := di.AddTrainer(user, pass); err {
+    switch id, err := trainerDB.AddTrainer(mem.WithTrainerName(user), mem.WithTrainerPassword(pass)); err {
     case nil:
         pbg.WriteAPISuccess(ctx,
             fmt.Sprintf("Created at %s", id.Hex()),
@@ -74,21 +77,21 @@ func handleLogin(ctx *fasthttp.RequestCtx) {
         return
     }
 
-    dataMechanism, ok := ctx.UserValue(pbg.DataInterfaceKey).(pbg.DataInterface)
+    trainerDB, ok := ctx.UserValue(pbg.TrainerDBInterfaceKey).(pbg.TrainerDBInterface)
     if !ok {
         // Error here
         pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
         return
     }
 
-    sessionMechanism, ok := ctx.UserValue(pbg.SessionInterfaceKey).(pbg.SessionInterface)
+    sessionDB, ok := ctx.UserValue(pbg.SessionDBInterfaceKey).(pbg.SessionInterface)
     if !ok {
         // Error here
         pbg.WriteAPIError(ctx, ErrInHandlerConversion, fasthttp.StatusInternalServerError)
         return
     }
 
-    trainer, err := dataMechanism.GetTrainerByName(user)
+    trainer, err := trainerDB.GetTrainerByName(user)
     if err == pbg.ErrTrainerNotFound {
         pbg.WriteAPIError(ctx, err, fasthttp.StatusNotFound)
         return
@@ -102,7 +105,11 @@ func handleLogin(ctx *fasthttp.RequestCtx) {
         return
     }
 
-    if session, err := sessionMechanism.AddSession(trainer); err != nil {
+    if session, err := sessionDB.AddSession(
+        mem.WithReference(trainer),
+        mem.WithToken(uuid.NewV4().String()),
+        mem.WithExpiringDate(time.Now().Add(time.Minute * 5)),
+    ); err != nil {
         pbg.WriteAPIError(ctx, err, fasthttp.StatusInternalServerError)
     } else {
         pbg.WriteAPISuccess(ctx, session, fasthttp.StatusCreated)

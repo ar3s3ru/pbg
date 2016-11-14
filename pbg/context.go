@@ -13,10 +13,16 @@ const (
     // Usare un decoratore per controllare il token d'autorizzazione nelle richieste HTTP
     SessionKey = "session"
 
-    // Context key per accedere all'interfaccia col DB dei modelli del server
-    // Disponibile col decoratore Server.WithDataAccess()
-    DataInterfaceKey    = "dataInterface"
+    // Context key per accedere all'interfaccia del DB delle mosse
+    // Disponibile col decoratore Server.WithMoveDBAccess()
+    MoveDBInterfaceKey = "moveDBInterface"
+    // Context key per accedere all'interfaccia del DB dei pokèmon
+    // Disponibile col decoratore Server.WithPokèmonDBAccess()
+    PokèmonDBInterfaceKey = "pokèmonDBInterface"
+    // Context key per accedere all'interfaccia del DB degli allenatori
+    // Disponibile col decoratore Server.WithTrainerDBAccess()
+    TrainerDBInterfaceKey = "trainerDBInterface"
     // Context key per accedere all'interfaccia col DB delle sessioni del server
-    // Disponibile col decoratore Server.WithSessionAccess()
-    SessionInterfaceKey = "sessionInterface"
+    // Disponibile col decoratore Server.WithSessionDBAccess()
+    SessionDBInterfaceKey = "sessionDBInterface"
 )

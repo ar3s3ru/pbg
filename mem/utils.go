@@ -19,7 +19,7 @@ var (
 //
 // Ritorna il valore del token in []byte in caso di successo, o un errore
 // nel caso, appunto, d'errore
-func basicAuthorization(header []byte) ([]byte, error) {
+func BasicAuthorization(header []byte) ([]byte, error) {
     if bytes.HasPrefix(header, authorizationPrefix) {
         // Decode from base64 to UTF-8 string
         payload, err := base64.StdEncoding.DecodeString(string(header[len(authorizationPrefix):]))
@@ -35,6 +35,20 @@ func basicAuthorization(header []byte) ([]byte, error) {
     }
     // Some error occurred, that means we had an invalid Authorization header
     return nil, pbg.ErrInvalidAuthorizationHeader
+}
+
+// Converte un file JSON in due dataset, rispettivamente, per i Pokèmon e per le mosse
+// Ritorna un errore nel caso di problemi con la conversione; i primi campi saranno settati su nil
+func WithDatasetFile(file string) ([]pbg.Pokèmon, []pbg.Move, error) {
+    sf, err := marshalSourceFile(file)
+    if err != nil {
+        return nil, nil,err
+    }
+
+    pokèmons := convertLtoPL(sf.PList)
+    moves    := convertLtoML(sf.MList)
+
+    return pokèmons, moves, nil
 }
 
 // Converte uno slice di tipo mem.move (non esportato) in uno slice

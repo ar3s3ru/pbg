@@ -24,6 +24,9 @@ var (
 
     ErrInvalidAPIEndpoint      = errors.New(`Invalid API endpoint value (must be at least 2 character and start with an "/"`)
     ErrInvalidAPIResponser     = errors.New("Invalid APIResponser value used in the builder")
-    ErrInvalidDataComponent    = errors.New("Invalid DataComponent object used")
     ErrInvalidSessionComponent = errors.New("Invalid SessionComponent object used")
+
+    ErrInvalidMoveDBComponent    = errors.New("Invalid MoveDBComponent value passed to the Server")
+    ErrInvalidPokèmonDBComponent = errors.New("Invalid PokèmonDBComponent value passed to the Server")
+    ErrInvalidTrainerDBComponent = errors.New("Invalid TrainerDBComponent value passed to the Server")
 )

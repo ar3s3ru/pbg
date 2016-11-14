@@ -2,6 +2,7 @@ package mem
 
 import (
     "time"
+    "golang.org/x/crypto/bcrypt"
 
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
 )
@@ -45,9 +46,14 @@ func WithTrainerName(name string) pbg.TrainerFactoryOption {
     })
 }
 
-func WithTrainerPassword(pass []byte) pbg.TrainerFactoryOption {
+func WithTrainerPassword(pass string) pbg.TrainerFactoryOption {
     return adaptTrainerFactoryOption(func(trainer *trainer) error {
-        trainer.hashedPass = pass
+        pwd, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+        if err != nil {
+            return pbg.ErrPasswordSalting
+        }
+
+        trainer.hashedPass = pwd
         return nil
     })
 }
