@@ -29,10 +29,6 @@ func WithMoves(moves []pbg.Move) MoveDBComponentOption {
 
 func WithMoveDBLogger(logger *log.Logger) MoveDBComponentOption {
     return func(mdb *MoveDBComponent) error {
-        if logger == nil {
-            return pbg.ErrInvalidLogger
-        }
-
         mdb.logger = logger
         return nil
     }

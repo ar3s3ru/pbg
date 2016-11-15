@@ -8,11 +8,12 @@ import (
 )
 
 type (
-    trainerFactoryOption func(*trainer) error
+    TrainerFactory       func(...TrainerFactoryOption) (pbg.Trainer, error)
+    TrainerFactoryOption func(*Trainer)                error
 )
 
-func NewTrainer(options ...pbg.TrainerFactoryOption) (pbg.Trainer, error) {
-    trainer := &trainer{
+func NewTrainer(options ...TrainerFactoryOption) (pbg.Trainer, error) {
+    trainer := &Trainer{
         signUp:     time.Now(),
         setted:     false,
         team:       [6]pbg.PokèmonTeam{nil, nil, nil, nil, nil, nil},
@@ -28,26 +29,15 @@ func NewTrainer(options ...pbg.TrainerFactoryOption) (pbg.Trainer, error) {
     return trainer, nil
 }
 
-func adaptTrainerFactoryOption(option trainerFactoryOption) pbg.TrainerFactoryOption {
-    return func(tr pbg.Trainer) error {
-        switch converted := tr.(type) {
-        case *trainer:
-            return option(converted)
-        default:
-            return ErrInvalidTrainerType
-        }
+func WithTrainerName(name string) TrainerFactoryOption {
+    return func(trainer *Trainer) error {
+        trainer.name = name
+        return nil
     }
 }
 
-func WithTrainerName(name string) pbg.TrainerFactoryOption {
-    return adaptTrainerFactoryOption(func(trainer *trainer) error {
-        trainer.name = name
-        return nil
-    })
-}
-
-func WithTrainerPassword(pass string) pbg.TrainerFactoryOption {
-    return adaptTrainerFactoryOption(func(trainer *trainer) error {
+func WithTrainerPassword(pass string) TrainerFactoryOption {
+    return func(trainer *Trainer) error {
         pwd, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
         if err != nil {
             return pbg.ErrPasswordSalting
@@ -55,5 +45,5 @@ func WithTrainerPassword(pass string) pbg.TrainerFactoryOption {
 
         trainer.hashedPass = pwd
         return nil
-    })
+    }
 }

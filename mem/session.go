@@ -8,12 +8,12 @@ import (
 )
 
 var (
-    sessionMarshalBase = []byte(`{"user":,"token":""`)
+    sessionJSONBase = []byte(`{"user":,"token":""}`)
 )
 
 type Session struct {
-    user   pbg.Trainer `json:"user"`
-    token  string      `json:"token"`
+    user   pbg.Trainer
+    token  string
     expire time.Time
 }
 
@@ -35,13 +35,14 @@ func (s *Session) MarshalJSON() ([]byte, error) {
         return nil, err
     }
 
-    session := make([]byte, len(sessionMarshalBase) + len(user) + len(s.token))
+    lenght  := len(sessionJSONBase) + len(user) + len(s.token)
+    session := make([]byte, lenght)
 
-    session = append(session, sessionMarshalBase[:8]...)
-    session = append(session, user...)
-    session = append(session, sessionMarshalBase[8:18]...)
-    session = append(session, []byte(s.token)...)
-    session = append(session, sessionMarshalBase[18:]...)
+    last := copy(session, sessionJSONBase[:8])
+    last += copy(session[last:], user)
+    last += copy(session[last:], sessionJSONBase[8:18])
+    last += copy(session[last:], []byte(s.token))
+    last += copy(session[last:], sessionJSONBase[18:])
 
     return session, nil
 }

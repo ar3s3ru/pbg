@@ -46,10 +46,10 @@ func (tdb *TrainerDBComponent) Log(v ...interface{}) {
     }
 }
 
-func (tdb *TrainerDBComponent) AddTrainer(options ...pbg.TrainerFactoryOption) (bson.ObjectId, error) {
+func (tdb *TrainerDBComponent) AddTrainer(user, pass string) (bson.ObjectId, error) {
     id, err := tdb.requestingWithReturn(
         func(ok chan<- interface{}, bad chan<- error, trainers map[bson.ObjectId]pbg.Trainer) {
-            trainer, err := tdb.factory(options...)
+            trainer, err := tdb.factory(WithTrainerName(user), WithTrainerPassword(pass))
             if err != nil {
                 bad <- err
                 return

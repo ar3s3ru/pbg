@@ -1,44 +1,74 @@
 package main
 
 import (
-    "github.com/ar3s3ru/PokemonBattleGo/pbg"
+    "log"
+
     "github.com/valyala/fasthttp"
+
+    "github.com/ar3s3ru/PokemonBattleGo/mem"
+    "github.com/ar3s3ru/PokemonBattleGo/pbg"
 )
 
-type unitTest func(pbg.Server, *fasthttp.HostClient)
+type (
+    unitTest func(pbg.Server, *fasthttp.HostClient)
+)
 
 var (
-    client *fasthttp.HostClient
+    unitTestChannel = make(chan unitTest)
 )
 
-//func init() {
-//
-//    if server != nil {
-//        panic("Server should be nil here")
-//    }
-//
-//    config  = &pbg.BaseConfiguration{Port: 8080, Local: true, Endpoint: "/api"}
-//    apiAddr = fmt.Sprintf("http://localhost:%d%s", config.Port, config.Endpoint)
-//
-//    // Client thing
-//    client = &fasthttp.HostClient{
-//        Addr: fmt.Sprintf("localhost:%d", config.Port),
-//    }
-//
-//    // Server thing
-//    sessionMechanism := createSessionMechanism()
-//    createServer(
-//        config,
-//        createDataMechanism(),
-//        sessionMechanism,
-//        createAuthorizationMechanism(sessionMechanism),
-//    )
-//
-//    // Handle some things here
-//    setupServer()
-//    startAsynchronous()
-//}
-//
-//func withServerTesting(test unitTest) {
-//    test(server, client)
-//}
+const (
+    address     = "localhost:8080"
+    httpAddress = "http://" + address + "/api"
+)
+
+func init() {
+    log.Println("Initing main_test.go")
+    go unitTestingLoop(unitTestChannel)
+}
+
+func creatingTestingServer() pbg.Server {
+    return pbg.NewServer(
+        pbg.WithHTTPPort(8080),
+        pbg.WithAPIResponser(pbg.NewJSONResponser()),
+        pbg.WithMoveDBComponent(
+            mem.NewMoveDBComponent(
+                mem.WithMoves(make([]pbg.Move, 10)),
+            ),
+        ),
+        pbg.WithPokèmonDBComponent(
+            mem.NewPokèmonDBComponent(
+                mem.WithPokèmons(make([]pbg.Pokèmon, 10)),
+            ),
+        ),
+        pbg.WithTrainerDBComponent(
+            mem.NewTrainerDBComponent(),
+        ),
+        pbg.WithSessionDBComponent(
+            mem.NewSessionComponent(),
+        ),
+    )
+}
+
+func unitTestingLoop(testRequests <-chan unitTest) {
+    server := creatingTestingServer()
+    client := &fasthttp.HostClient{Addr: address}
+
+    routing(server)
+    go server.Start()
+
+    for request := range testRequests {
+        request(server, client)
+    }
+}
+
+func withServerTesting(test unitTest) {
+    sync := make(chan bool, 1)
+
+    unitTestChannel <- func(server pbg.Server, client *fasthttp.HostClient) {
+        test(server, client)
+        sync <- true
+    }
+
+    <-sync
+}

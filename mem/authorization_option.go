@@ -3,12 +3,10 @@ package mem
 import (
     "log"
     "time"
-
-    "github.com/ar3s3ru/PokemonBattleGo/pbg"
 )
 
 type (
-    SessionDBComponentOption func(pbg.SessionComponent) error
+    SessionDBComponentOption func(*SessionDBComponent) error
 )
 
 func WithSessionDBLogger(logger *log.Logger) SessionDBComponentOption {

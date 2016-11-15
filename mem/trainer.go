@@ -8,7 +8,11 @@ import (
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
 )
 
-type trainer struct {
+var (
+    trainerJSONBase = []byte(`{"name":"","sign_up":"","set":,"class":"","team":}`)
+)
+
+type Trainer struct {
     name       string
     hashedPass []byte
     signUp     time.Time
@@ -18,31 +22,31 @@ type trainer struct {
     team   [6]pbg.PokèmonTeam
 }
 
-func (t *trainer) Name() string {
+func (t *Trainer) Name() string {
     return t.name
 }
 
-func (t *trainer) PasswordHash() []byte {
+func (t *Trainer) PasswordHash() []byte {
     return t.hashedPass
 }
 
-func (t *trainer) SignUpDate() time.Time {
+func (t *Trainer) SignUpDate() time.Time {
     return t.signUp
 }
 
-func (t *trainer) Set() bool {
+func (t *Trainer) Set() bool {
     return t.setted
 }
 
-func (t *trainer) Class() pbg.TrainerClass {
+func (t *Trainer) Class() pbg.TrainerClass {
     return t.class
 }
 
-func (t *trainer) Team() [6]pbg.PokèmonTeam {
+func (t *Trainer) Team() [6]pbg.PokèmonTeam {
     return t.team
 }
 
-func (t *trainer) SetTrainer(team [6]pbg.PokèmonTeam, class pbg.TrainerClass) error {
+func (t *Trainer) SetTrainer(team [6]pbg.PokèmonTeam, class pbg.TrainerClass) error {
     t.team   = team
     t.class  = class
     t.setted = true
@@ -50,7 +54,7 @@ func (t *trainer) SetTrainer(team [6]pbg.PokèmonTeam, class pbg.TrainerClass) e
     return nil
 }
 
-func (t *trainer) UpdateTrainer(team [6]pbg.PokèmonTeam) error {
+func (t *Trainer) UpdateTrainer(team [6]pbg.PokèmonTeam) error {
     t.setted = true
     t.team   = team
 
@@ -58,15 +62,38 @@ func (t *trainer) UpdateTrainer(team [6]pbg.PokèmonTeam) error {
 }
 
 // Implements the Marshaler interface for JSON mashaling
-func (t *trainer) MarshalJSON() ([]byte, error) {
-    set  := strconv.FormatBool(t.setted)
-    base := `{"name":"` + t.Name() + `","sign_up":"` + t.signUp.String() + `","set":` + set
-
-    if !t.Set() {
-        return []byte(base + `}`), nil
-    } else if team, err := json.Marshal(t.Team()); err != nil {
-        return nil, err
-    } else {
-        return []byte(base + `,"team":` + string(team) + `,"class":"` + t.Class().String() + `"}`), nil
+func (t *Trainer) MarshalJSON() ([]byte, error) {
+    converted := [][]byte{
+        []byte(t.Name()),
+        []byte(t.SignUpDate().String()),
+        []byte(strconv.FormatBool(t.Set())),
+        []byte(t.Class().String()),
+        []byte("null"),
     }
+
+    if t.Set() {
+        team, err := json.Marshal(t.Team())
+        if err != nil {
+            return nil, err
+        } else {
+            converted[4] = team
+        }
+    }
+
+    lenght  := len(trainerJSONBase) + argsLen(converted)
+    trainer := make([]byte, lenght)
+
+    last := copy(trainer, trainerJSONBase[:9])
+    last += copy(trainer[last:], converted[0])
+    last += copy(trainer[last:], trainerJSONBase[9:22])
+    last += copy(trainer[last:], converted[1])
+    last += copy(trainer[last:], trainerJSONBase[22:30])
+    last += copy(trainer[last:], converted[2])
+    last += copy(trainer[last:], trainerJSONBase[30:40])
+    last += copy(trainer[last:], converted[3])
+    last += copy(trainer[last:], trainerJSONBase[40:49])
+    last += copy(trainer[last:], converted[4])
+    last += copy(trainer[last:], trainerJSONBase[49:])
+
+    return trainer, nil
 }

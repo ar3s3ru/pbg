@@ -77,6 +77,36 @@ func registerSignals() {
     go notifyHandling(sigCh)
 }
 
+func creating(moves []pbg.Move, pokèmons []pbg.Pokèmon) pbg.Server {
+    return pbg.NewServer(
+        pbg.WithHTTPPort(*httpPort),
+        pbg.WithAPIResponser(pbg.NewJSONResponser()),
+        pbg.WithLogger(log.New(os.Stderr, "Server - ", log.LstdFlags|log.Lshortfile)),
+        pbg.WithMoveDBComponent(
+            mem.NewMoveDBComponent(
+                mem.WithMoves(moves),
+                mem.WithMoveDBLogger(log.New(os.Stderr, "MoveDB - ", log.LstdFlags|log.Lshortfile)),
+            ),
+        ),
+        pbg.WithPokèmonDBComponent(
+            mem.NewPokèmonDBComponent(
+                mem.WithPokèmons(pokèmons),
+                mem.WithPokèmonDBLogger(log.New(os.Stderr, "PokèmonDB - ", log.LstdFlags|log.Lshortfile)),
+            ),
+        ),
+        pbg.WithTrainerDBComponent(
+            mem.NewTrainerDBComponent(
+                mem.WithTrainerDBLogger(log.New(os.Stderr, "TrainerDB - ", log.LstdFlags|log.Lshortfile)),
+            ),
+        ),
+        pbg.WithSessionDBComponent(
+            mem.NewSessionComponent(
+                mem.WithSessionDBLogger(log.New(os.Stderr, "SessionDB - ", log.LstdFlags|log.Lshortfile)),
+            ),
+        ),
+    )
+}
+
 func routing(server pbg.Server) {
     withAuthorization := authorizedHandler(server)
 
@@ -89,11 +119,11 @@ func routing(server pbg.Server) {
         pbg.Adapt(handlePokèmonList, server.WithPokèmonDBAccess))
 
     server.API_POST(RegistratonPath,
-        pbg.Adapt(handleRegistration, //withMEMProfile,
-                                      server.WithLogger,
+        pbg.Adapt(HandleRegistration, //withMEMProfile,
+                                      //server.WithLogger,
                                       server.WithTrainerDBAccess))
     server.API_POST(LoginPath,
-        pbg.Adapt(handleLogin, //withMEMProfile,
+        pbg.Adapt(HandleLogin, //withMEMProfile,
                                server.WithTrainerDBAccess,
                                server.WithSessionDBAccess))
 
@@ -114,34 +144,10 @@ func main() {
         panic(err)
     }
 
-    server := pbg.NewServer(
-        pbg.WithHTTPPort(*httpPort),
-        pbg.WithAPIResponser(pbg.NewJSONResponser()),
-        pbg.WithLogger(log.New(os.Stderr, "Server - ", log.LstdFlags|log.Lshortfile)),
-        pbg.WithMoveDBComponent(
-            mem.NewMoveDBComponent(
-                mem.WithMoves(mDataset),
-                mem.WithMoveDBLogger(log.New(os.Stderr, "MoveDB - ", log.LstdFlags|log.Lshortfile)),
-            ),
-        ),
-        pbg.WithPokèmonDBComponent(
-            mem.NewPokèmonDBComponent(
-                mem.WithPokèmons(pDataset),
-                mem.WithPokèmonDBLogger(log.New(os.Stderr, "PokèmonDB - ", log.LstdFlags|log.Lshortfile)),
-            ),
-        ),
-        pbg.WithTrainerDBComponent(
-            mem.NewTrainerDBComponent(
-                mem.WithTrainerDBLogger(log.New(os.Stderr, "TrainerDB - ", log.LstdFlags|log.Lshortfile)),
-            ),
-        ),
-        pbg.WithSessionDBComponent(
-            mem.NewSessionComponent(
-                mem.WithSessionDBLogger(log.New(os.Stderr, "SessionDB - ", log.LstdFlags|log.Lshortfile)),
-            ),
-        ),
-    )
+    // Create new server
+    server := creating(mDataset, pDataset)
 
+    // Register handlers and signals notifier
     routing(server)
     registerSignals()
 

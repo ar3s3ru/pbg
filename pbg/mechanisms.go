@@ -1,6 +1,9 @@
 package pbg
 
-import "gopkg.in/mgo.v2/bson"
+import (
+    "time"
+    "gopkg.in/mgo.v2/bson"
+)
 
 type (
     // Interfaccia per accedere al logger di un particolare componente del framework
@@ -57,10 +60,10 @@ type (
     TrainerDBInterface interface {
         Logger
 
-        AddTrainer(options ...TrainerFactoryOption) (bson.ObjectId, error)
-        GetTrainerByName(name string)               (Trainer, error)
-        GetTrainerById(id bson.ObjectId)            (Trainer, error)
-        DeleteTrainer(id bson.ObjectId)             error
+        AddTrainer(user, pass string)    (bson.ObjectId, error)
+        GetTrainerByName(name string)    (Trainer, error)
+        GetTrainerById(id bson.ObjectId) (Trainer, error)
+        DeleteTrainer(id bson.ObjectId)  error
     }
 
     // Componente software che identifica il DB delle sessioni del server
@@ -84,8 +87,8 @@ type (
         // Operazioni CRUD -------------------------
         // -----------------------------------------
 
-        AddSession(options ...SessionFactoryOption) (Session, error)
-        GetSession(token string)                    (Session, error)
-        DeleteSession(token string)                 error
+        AddSession(trainer Trainer, expire time.Time) (Session, error)
+        GetSession(token string)                      (Session, error)
+        DeleteSession(token string)                   error
     }
 )

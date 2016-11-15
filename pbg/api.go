@@ -14,7 +14,7 @@ type (
         // l'errore in caso di fallimento
         //
         // Restituisce la risposta tradotta pronta da essere mandata al client
-        Writer(statusCode int, data interface{}, err error) []byte
+        Writer(statusCode int, data interface{}, err error) ([]byte, int)
 
         // Ritorna l'header HTTP Content-Type che definisce il tipo di risposta del server
         ContentType() []byte
@@ -22,7 +22,7 @@ type (
 
     // APIResponser che si occupa di tradurre le risposte del server in formato JSON
     // e le invia usando le strutture JSONSuccess e JSONError
-    JSONResponser func(statusCode int, data interface{}, err error) []byte
+    JSONResponser func(statusCode int, data interface{}, err error) ([]byte, int)
 
     // Rappresenta la struttura JSON di un messaggio di successo
     JSONSuccess struct {
@@ -70,13 +70,18 @@ func (srv *server) apiWriter(handler fasthttp.RequestHandler) fasthttp.RequestHa
         }
 
         // Nessun errore, traduci i dati e scrivi nel contesto della risposta
-        ctx.Response.SetBody(srv.apiResponser.Writer(
+        // N.B. POTREBBERO ESSERCI ERRORI DURANTE LA WRITE!
+        //      Quindi lo status code della risposta HTTP deve essere confermato dalla
+        //      chiamata al Writer()
+        body, code := srv.apiResponser.Writer(
             ctx.Response.StatusCode(),
             ctx.UserValue(APIDataKey),
             err,
-        ))
+        )
 
         // Segnala al client il tipo della risposta
+        ctx.SetBody(body)
+        ctx.SetStatusCode(code)
         ctx.SetContentTypeBytes(srv.apiResponser.ContentType())
     }
 }
@@ -86,11 +91,15 @@ func (srv *server) apiWriter(handler fasthttp.RequestHandler) fasthttp.RequestHa
 func NewJSONResponser() JSONResponser {
     // In verità, questo APIResponser è la stessa funzione Writer che vorremmo
     // avere (vedere l'implementazione di JSONResponser.Writer() per capire)
-    return func(statusCode int, data interface{}, err error) []byte {
+    return func(statusCode int, data interface{}, err error) (body []byte, code int) {
         var (
             response []byte // Body della risposta
             errInt error    // Errore interno, può capitare durante il marshalling in JSON
         )
+
+        // Il codice HTTP di conferma inizialmente è quello passato come argomento
+        // Potrebbe cambiare in caso di errore
+        code = statusCode
 
         if data != nil {
             // La richiesta ha avuto successo
@@ -98,7 +107,7 @@ func NewJSONResponser() JSONResponser {
             response, errInt = json.Marshal(dataJson)
         } else if err != nil {
             // La richiesta non ha avuto successo
-            errJson := JSONError{fasthttp.StatusMessage(statusCode), err.Error()}
+            errJson := JSONError{fasthttp.StatusMessage(code), err.Error()}
             response, errInt = json.Marshal(errJson)
         } else {
             // TODO: insert error here (se i due casi precedenti non sono validi)
@@ -107,15 +116,17 @@ func NewJSONResponser() JSONResponser {
         if errInt != nil {
             // Abbiamo avuto un errore interno, in particolare durante il mashalling in JSON
             // Quindi utilizziamo una risposta JSON "hardcoded" per descrivere l'errore
-            return []byte(`{"error":"` + fasthttp.StatusMessage(statusCode) + `","message":"` + errInt.Error() + `"}`)
+            code = fasthttp.StatusInternalServerError
+            body = []byte(`{"error":"` + fasthttp.StatusMessage(code) + `","message":"` + errInt.Error() + `"}`)
+            return
         }
 
-        return response
+        return response, code
     }
 }
 
 
-func (jr JSONResponser) Writer(statusCode int, data interface{}, err error) []byte {
+func (jr JSONResponser) Writer(statusCode int, data interface{}, err error) ([]byte, int) {
     // Chiama la funzione di JSONResponser sui dati passati al Writer
     return jr(statusCode, data, err)
 }

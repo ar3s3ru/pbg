@@ -73,7 +73,7 @@ func handleSettingTeamUp(ctx *fasthttp.RequestCtx) {
         logger.Println(pokèmonBody)
         pokèmon, err := pokèmonDB.GetPokèmon(pokèmonBody.Pkmn)
         if err != nil {
-            pbg.WriteAPIError(ctx, err, fasthttp.StatusNotFound)
+            pbg.WriteAPIError(ctx, err, fasthttp.StatusBadRequest)
             return
         }
 
@@ -81,7 +81,7 @@ func handleSettingTeamUp(ctx *fasthttp.RequestCtx) {
         for i, moveId := range pokèmonBody.Moves {
             move, err := moveDB.GetMove(moveId)
             if err != nil {
-                pbg.WriteAPIError(ctx, err, fasthttp.StatusNotFound)
+                pbg.WriteAPIError(ctx, err, fasthttp.StatusBadRequest)
                 return
             }
 

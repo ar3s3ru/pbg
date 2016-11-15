@@ -134,3 +134,12 @@ func checkEvs(evs [6]int) bool {
 func checkLevel(level int) bool {
     return level >= 1 && level <= 100
 }
+
+func argsLen(args [][]byte) int {
+    lenght := 0
+    for _, arg := range args {
+        lenght += len(arg)
+    }
+
+    return lenght
+}

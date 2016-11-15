@@ -2,16 +2,13 @@ package main
 
 import (
     "fmt"
+    "time"
     "encoding/json"
 
     "golang.org/x/crypto/bcrypt"
-
     "github.com/valyala/fasthttp"
+
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
-    "log"
-    "github.com/ar3s3ru/PokemonBattleGo/mem"
-    "github.com/satori/go.uuid"
-    "time"
 )
 
 type PostBody struct {
@@ -38,7 +35,7 @@ func DecodePostBody(bPostBody []byte) (user string, pass string, err error) {
     return
 }
 
-func handleRegistration(ctx *fasthttp.RequestCtx) {
+func HandleRegistration(ctx *fasthttp.RequestCtx) {
     user, pass, err := DecodePostBody(ctx.PostBody())
     if err != nil {
         pbg.WriteAPIError(ctx, err, fasthttp.StatusInternalServerError)
@@ -52,10 +49,7 @@ func handleRegistration(ctx *fasthttp.RequestCtx) {
         return
     }
 
-    logger := ctx.UserValue(pbg.LoggerKey).(*log.Logger)
-    logger.Println("Adding trainer")
-
-    switch id, err := trainerDB.AddTrainer(mem.WithTrainerName(user), mem.WithTrainerPassword(pass)); err {
+    switch id, err := trainerDB.AddTrainer(user, pass); err {
     case nil:
         pbg.WriteAPISuccess(ctx,
             fmt.Sprintf("Created at %s", id.Hex()),
@@ -63,14 +57,12 @@ func handleRegistration(ctx *fasthttp.RequestCtx) {
         )
     case pbg.ErrTrainerAlreadyExists:
         pbg.WriteAPIError(ctx, err, fasthttp.StatusBadRequest)
-    case pbg.ErrPasswordSalting:
-        pbg.WriteAPIError(ctx, err, fasthttp.StatusInternalServerError)
     default:
         pbg.WriteAPIError(ctx, err, fasthttp.StatusInternalServerError)
     }
 }
 
-func handleLogin(ctx *fasthttp.RequestCtx) {
+func HandleLogin(ctx *fasthttp.RequestCtx) {
     user, pass, err := DecodePostBody(ctx.PostBody())
     if err != nil {
         pbg.WriteAPIError(ctx, err, fasthttp.StatusInternalServerError)
@@ -106,9 +98,7 @@ func handleLogin(ctx *fasthttp.RequestCtx) {
     }
 
     if session, err := sessionDB.AddSession(
-        mem.WithReference(trainer),
-        mem.WithToken(uuid.NewV4().String()),
-        mem.WithExpiringDate(time.Now().Add(time.Minute * 5)),
+        trainer, time.Now().Add(time.Minute * 5),
     ); err != nil {
         pbg.WriteAPIError(ctx, err, fasthttp.StatusInternalServerError)
     } else {

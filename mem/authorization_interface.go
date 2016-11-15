@@ -1,7 +1,10 @@
 package mem
 
 import (
+    "time"
+
     "github.com/ar3s3ru/PokemonBattleGo/pbg"
+    "github.com/satori/go.uuid"
 )
 
 func (sc *SessionDBComponent) Log(v ...interface{}) {
@@ -30,10 +33,12 @@ func (sc *SessionDBComponent) GetSession(token string) (pbg.Session, error) {
     }
 }
 
-func (sc *SessionDBComponent) AddSession(options ...pbg.SessionFactoryOption) (pbg.Session, error) {
+func (sc *SessionDBComponent) AddSession(trainer pbg.Trainer, expire time.Time) (pbg.Session, error) {
     sc.Log("Starting with adding new Session")
 
-    session, err := sc.sessionFactory(options...)
+    session, err := sc.sessionFactory(
+        WithReference(trainer), WithToken(uuid.NewV4().String()), WithExpiringDate(expire),
+    )
     if err != nil {
         return nil, err
     }
@@ -58,7 +63,7 @@ func (sc *SessionDBComponent) AddSession(options ...pbg.SessionFactoryOption) (p
 
 func (sc *SessionDBComponent) DeleteSession(token string) error {
     if len(token) != 36 {
-        return ErrInvalidToken
+        return ErrInvalidTokenValue
     }
 
     sc.sessionReqs <- func(sessions map[string]pbg.Session) {

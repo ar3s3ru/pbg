@@ -11,7 +11,7 @@ type (
     TrainerDBComponent struct {
         trainers map[bson.ObjectId]pbg.Trainer
         requests chan trainerRequest
-        factory  pbg.TrainerFactory
+        factory  TrainerFactory
         logger   *log.Logger
     }
 )

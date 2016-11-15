@@ -22,10 +22,6 @@ func WithPokèmons(pokèmons []pbg.Pokèmon) PokèmonDBComponentOption {
 
 func WithPokèmonDBLogger(logger *log.Logger) PokèmonDBComponentOption {
     return func(pdb *PokèmonDBComponent) error {
-        if logger == nil {
-            return pbg.ErrInvalidLogger
-        }
-
         pdb.logger = logger
         return nil
     }
