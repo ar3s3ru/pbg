@@ -3,82 +3,82 @@ package mem
 import "github.com/ar3s3ru/PokemonBattleGo/pbg"
 
 type (
-    PokèmonTeamOption func(*PokèmonTeam) error
+	PokèmonTeamOption func(*PokèmonTeam) error
 )
 
 func NewPokèmonTeam(options ...PokèmonTeamOption) (pbg.PokèmonTeam, error) {
-    pokèmon := &PokèmonTeam{}
+	pokèmon := &PokèmonTeam{}
 
-    for _, option := range options {
-        if err := option(pokèmon); err != nil {
-            return nil, err
-        }
-    }
+	for _, option := range options {
+		if err := option(pokèmon); err != nil {
+			return nil, err
+		}
+	}
 
-    return pokèmon, nil
+	return pokèmon, nil
 }
 
 func WithPokèmonReference(pkmn pbg.Pokèmon) PokèmonTeamOption {
-    return func(pokèmon *PokèmonTeam) error {
-        if pkmn == nil {
-            return ErrInvalidReferenceValue
-        }
+	return func(pokèmon *PokèmonTeam) error {
+		if pkmn == nil {
+			return ErrInvalidReferenceValue
+		}
 
-        pokèmon.Pokèmon = pkmn
-        return nil
-    }
+		pokèmon.Pokèmon = pkmn
+		return nil
+	}
 }
 
 func WithPokèmonMoves(move1, move2, move3, move4 pbg.Move) PokèmonTeamOption {
-    return func(pokèmon *PokèmonTeam) error {
-        if move1 == nil && move2 == nil && move3 == nil && move4 == nil {
-            return ErrInvalidMovesValue
-        }
+	return func(pokèmon *PokèmonTeam) error {
+		if move1 == nil && move2 == nil && move3 == nil && move4 == nil {
+			return ErrInvalidMovesValue
+		}
 
-        pokèmon.moves[0] = move1
-        pokèmon.moves[1] = move2
-        pokèmon.moves[2] = move3
-        pokèmon.moves[3] = move4
+		pokèmon.moves[0] = move1
+		pokèmon.moves[1] = move2
+		pokèmon.moves[2] = move3
+		pokèmon.moves[3] = move4
 
-        return nil
-    }
+		return nil
+	}
 }
 
 func WithPokèmonLevel(level int) PokèmonTeamOption {
-    return func(pokèmon *PokèmonTeam) error {
-        if !checkLevel(level) {
-            return ErrInvalidLevelValue
-        }
+	return func(pokèmon *PokèmonTeam) error {
+		if !checkLevel(level) {
+			return ErrInvalidLevelValue
+		}
 
-        pokèmon.level = level
-        return nil
-    }
+		pokèmon.level = level
+		return nil
+	}
 }
 
 func WithPokèmonIVs(ivs [6]int) PokèmonTeamOption {
-    return func(pokèmon *PokèmonTeam) error {
-        if !checkIvs(ivs) {
-            return ErrInvalidIVsValue
-        }
+	return func(pokèmon *PokèmonTeam) error {
+		if !checkIvs(ivs) {
+			return ErrInvalidIVsValue
+		}
 
-        for i := range pokèmon.ivs {
-            pokèmon.ivs[i] = ivs[i]
-        }
+		for i := range pokèmon.ivs {
+			pokèmon.ivs[i] = ivs[i]
+		}
 
-        return nil
-    }
+		return nil
+	}
 }
 
 func WithPokèmonEVs(evs [6]int) PokèmonTeamOption {
-    return func(pokèmon *PokèmonTeam) error {
-        if !checkEvs(evs) {
-            return ErrInvalidEVsValue
-        }
+	return func(pokèmon *PokèmonTeam) error {
+		if !checkEvs(evs) {
+			return ErrInvalidEVsValue
+		}
 
-        for i := range pokèmon.evs {
-            pokèmon.evs[i] = evs[i]
-        }
+		for i := range pokèmon.evs {
+			pokèmon.evs[i] = evs[i]
+		}
 
-        return nil
-    }
+		return nil
+	}
 }
