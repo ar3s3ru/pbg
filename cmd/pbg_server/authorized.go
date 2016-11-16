@@ -3,9 +3,10 @@ package main
 import (
 	"errors"
 
-	"github.com/ar3s3ru/PokemonBattleGo/mem"
-	"github.com/ar3s3ru/PokemonBattleGo/pbg"
 	"github.com/valyala/fasthttp"
+
+	"github.com/ar3s3ru/pbg"
+	"github.com/ar3s3ru/pbg/mem"
 )
 
 const MePath = "/me"

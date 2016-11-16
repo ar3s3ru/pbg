@@ -12,8 +12,8 @@ import (
 	//"os/signal"
 	"runtime/pprof"
 
-	"github.com/ar3s3ru/PokemonBattleGo/mem"
-	"github.com/ar3s3ru/PokemonBattleGo/pbg"
+	"github.com/ar3s3ru/pbg"
+	"github.com/ar3s3ru/pbg/mem"
 )
 
 var (
@@ -141,7 +141,7 @@ func main() {
 
 	pDataset, mDataset, err := mem.WithDatasetFile(*dataSet)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	// Create new server

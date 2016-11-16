@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/ar3s3ru/PokemonBattleGo/pbg"
+	"github.com/ar3s3ru/pbg"
 )
 
 var (

@@ -1,9 +1,10 @@
 package mem
 
 import (
-	"github.com/ar3s3ru/PokemonBattleGo/pbg"
-	"gopkg.in/mgo.v2/bson"
 	"time"
+
+	"github.com/ar3s3ru/pbg"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type (

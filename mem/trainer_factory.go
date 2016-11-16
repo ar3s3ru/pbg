@@ -4,7 +4,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"time"
 
-	"github.com/ar3s3ru/PokemonBattleGo/pbg"
+	"github.com/ar3s3ru/pbg"
 )
 
 type (

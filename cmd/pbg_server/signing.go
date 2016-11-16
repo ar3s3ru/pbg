@@ -8,7 +8,7 @@ import (
 	"github.com/valyala/fasthttp"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/ar3s3ru/PokemonBattleGo/pbg"
+	"github.com/ar3s3ru/pbg"
 )
 
 type PostBody struct {

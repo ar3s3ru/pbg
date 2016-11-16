@@ -1,6 +1,6 @@
 package mem
 
-import "github.com/ar3s3ru/PokemonBattleGo/pbg"
+import "github.com/ar3s3ru/pbg"
 
 func (mdb *MoveDBComponent) Log(v ...interface{}) {
 	if mdb.logger != nil {

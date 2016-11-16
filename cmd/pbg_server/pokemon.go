@@ -3,7 +3,7 @@ package main
 import (
 	"strconv"
 
-	"github.com/ar3s3ru/PokemonBattleGo/pbg"
+	"github.com/ar3s3ru/pbg"
 	"github.com/valyala/fasthttp"
 )
 
