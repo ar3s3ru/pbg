@@ -3,6 +3,7 @@ package pbg
 import (
 	"log"
 	"strings"
+	"github.com/valyala/fasthttp"
 )
 
 type (
@@ -140,6 +141,17 @@ func WithSessionDBComponent(sc SessionComponent) ServerOption {
 		}
 
 		srv.sessionDB = sc
+		return nil
+	})
+}
+
+func WithFastHTTPServer(fsrv *fasthttp.Server) ServerOption {
+	return adaptServerOption(func(srv *server) error {
+		if fsrv == nil {
+			return ErrInvalidFastHTTPServer
+		}
+
+		srv.Server = fsrv
 		return nil
 	})
 }

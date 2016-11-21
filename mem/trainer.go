@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	trainerJSONBase = []byte(`{"name":"","sign_up":"","set":,"class":"","team":}`)
+	trainerJSONBase = []byte(`{"name":"","sign_up":"","set":,"class":,"team":}`)
 )
 
 type Trainer struct {
@@ -63,11 +63,12 @@ func (t *Trainer) UpdateTrainer(team [6]pbg.PokèmonTeam) error {
 
 // Implements the Marshaler interface for JSON mashaling
 func (t *Trainer) MarshalJSON() ([]byte, error) {
+	class, _ := json.Marshal(t.Class())
 	converted := [][]byte{
 		[]byte(t.Name()),
 		[]byte(t.SignUpDate().String()),
 		[]byte(strconv.FormatBool(t.Set())),
-		[]byte(t.Class().String()),
+		class,
 		[]byte("null"),
 	}
 
@@ -89,11 +90,11 @@ func (t *Trainer) MarshalJSON() ([]byte, error) {
 	last += copy(trainer[last:], converted[1])
 	last += copy(trainer[last:], trainerJSONBase[22:30])
 	last += copy(trainer[last:], converted[2])
-	last += copy(trainer[last:], trainerJSONBase[30:40])
+	last += copy(trainer[last:], trainerJSONBase[30:39])
 	last += copy(trainer[last:], converted[3])
-	last += copy(trainer[last:], trainerJSONBase[40:49])
+	last += copy(trainer[last:], trainerJSONBase[39:47])
 	last += copy(trainer[last:], converted[4])
-	last += copy(trainer[last:], trainerJSONBase[49:])
+	last += copy(trainer[last:], trainerJSONBase[47:])
 
 	return trainer, nil
 }

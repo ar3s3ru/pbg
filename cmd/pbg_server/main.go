@@ -131,7 +131,6 @@ func routing(server pbg.Server) {
 		pbg.Adapt(handleMePath, withAuthorization))
 	server.API_POST(SetupPath,
 		pbg.Adapt(handleSettingTeamUp, withAuthorization,
-			server.WithLogger,
 			server.WithMoveDBAccess,
 			server.WithPokèmonDBAccess))
 }

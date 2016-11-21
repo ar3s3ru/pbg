@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"log"
 
 	"github.com/valyala/fasthttp"
 
@@ -51,7 +50,6 @@ func handleSettingTeamUp(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	logger := ctx.UserValue(pbg.LoggerKey).(*log.Logger)
 	user := session.Reference()
 	if user.Set() {
 		pbg.WriteAPIError(ctx, ErrTrainerAlreadySetUp, fasthttp.StatusConflict)
@@ -70,7 +68,7 @@ func handleSettingTeamUp(ctx *fasthttp.RequestCtx) {
 			continue
 		}
 
-		logger.Println(pokèmonBody)
+		ctx.Logger().Printf("Pokèmon body req is: %v\n", pokèmonBody)
 		pokèmon, err := pokèmonDB.GetPokèmon(pokèmonBody.Pkmn)
 		if err != nil {
 			pbg.WriteAPIError(ctx, err, fasthttp.StatusBadRequest)

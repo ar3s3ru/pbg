@@ -252,12 +252,20 @@ func (c Category) String() string {
 	return "Undefined"
 }
 
+func (c Category) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + c.String() + `"`), nil
+}
+
 func (t Type) String() string {
 	if t >= Normal && t <= Undefined {
 		return TypeNames[t]
 	}
 
 	return "Undefined"
+}
+
+func (t Type) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + t.String() + `"`), nil
 }
 
 func (tc TrainerClass) String() string {
@@ -268,10 +276,18 @@ func (tc TrainerClass) String() string {
 	return "Undefined"
 }
 
+func (tc TrainerClass) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + tc.String() + `"`), nil
+}
+
 func (pt PokèmonType) String() string {
 	if pt[1] == -1 {
 		return pt[0].String()
 	} else {
 		return fmt.Sprintf("%s/%s", pt[0].String(), pt[1].String())
 	}
+}
+
+func (pt PokèmonType) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + pt.String() + `"`), nil
 }

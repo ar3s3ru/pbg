@@ -6,6 +6,7 @@ import (
 
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
+	"os"
 )
 
 type (
@@ -48,9 +49,6 @@ type (
 	//     }
 	//
 	ServerAdapters interface {
-		// Fornisce l'accesso all'interfaccia Logger del server mediante RequestCtx
-		// Il logger è disponibile con la chiave pbg.LoggerKey
-		WithLogger(fasthttp.RequestHandler) fasthttp.RequestHandler
 		// Fornisce interfaccia al DB delle mosse mediante RequestCtx
 		// L'interfaccia è disponibile con la chiave pbg.MoveDBInterfaceKey
 		WithMoveDBAccess(fasthttp.RequestHandler) fasthttp.RequestHandler
@@ -69,7 +67,7 @@ type (
 	// le capacità di usare il protocollo HTTP (quindi registrare RequestHandlers)
 	// e degli Adapter per estendere a dovere i RequestHandler utente con l'accesso a risorse protette
 	Server interface {
-		Logger
+		fasthttp.Logger
 		ServerHTTP
 		ServerAdapters
 
@@ -78,9 +76,11 @@ type (
 	}
 
 	server struct {
-		port   int                    // Porta HTTP
-		logger *log.Logger            // Logger
-		router *fasthttprouter.Router // HTTP router
+		*fasthttp.Server
+
+		port   int
+		router *fasthttprouter.Router
+		logger *log.Logger
 
 		apiEndpoint  string       // Endpoint dell'API server
 		apiResponser APIResponser // Traduttore per le richieste API
@@ -93,18 +93,22 @@ type (
 )
 
 var (
-	// Check functions (to show how many ways there are to declare fuctions in Go)
-	check = func(data interface{}, err error) {
-		if data == nil {
-			panic(err)
+	defaultLogger = log.New(os.Stderr, "PBG Server: ", log.LstdFlags|log.Lshortfile)
+
+	checkValueWithLogger = func(logger *log.Logger, value interface{}, err error) {
+		if logger != nil && value == nil {
+			logger.Fatal(err)
 		}
 	}
 
-	checkErr = func(err error) {
-		if err != nil {
-			panic(err)
+	checkErrorWithLogger = func(logger *log.Logger, err error) {
+		if logger != nil && err != nil {
+			logger.Fatal(err)
 		}
 	}
+
+	checkValue = func(value interface{}, err error) { checkValueWithLogger(defaultLogger, value, err) }
+	checkError = func(err error) { checkErrorWithLogger(defaultLogger, err) }
 )
 
 // Factory methods per oggetti pbg.Server
@@ -112,22 +116,35 @@ var (
 // sull'oggetto costruito
 func NewServer(options ...ServerOption) Server {
 	srv := &server{
-		port:         8080,
+		port:         80,
 		router:       fasthttprouter.New(),
 		apiResponser: NewJSONResponser(),
 		apiEndpoint:  "/api",
 	}
 
 	for _, option := range options {
-		// TODO: cleanup and exiting
-		checkErr(option(srv))
+		checkError(option(srv))
+	}
+
+	if srv.logger == nil {
+		srv.logger = defaultLogger
 	}
 
 	// Check needed parameters
-	check(srv.apiResponser, ErrInvalidAPIResponser)
-	check(srv.moveDB, ErrInvalidMoveDBComponent)
-	check(srv.pokèmonDB, ErrInvalidPokèmonDBComponent)
-	check(srv.sessionDB, ErrInvalidSessionComponent)
+	checkValue(srv.apiResponser, ErrInvalidAPIResponser)
+	checkValue(srv.moveDB, ErrInvalidMoveDBComponent)
+	checkValue(srv.pokèmonDB, ErrInvalidPokèmonDBComponent)
+	checkValue(srv.sessionDB, ErrInvalidSessionComponent)
+
+	// If server is not set up, use a standard server
+	if srv.Server == nil {
+		srv.Server = &fasthttp.Server{
+			Logger: srv.logger,
+		}
+	}
+
+	// Server handler from fasthttprouter
+	srv.Server.Handler = srv.router.Handler
 
 	return srv
 }
@@ -166,32 +183,19 @@ func (srv *server) API_DELETE(path string, handle fasthttp.RequestHandler) {
 
 func (srv *server) Start() {
 	address := fmt.Sprintf(":%d", srv.port)
-
-	srv.Log("Serving on", address)
-	srv.Log(
-		fasthttp.ListenAndServe(address, srv.router.Handler),
+	srv.logger.Fatal(
+		srv.ListenAndServe(address),
 	)
 }
 
-func (srv *server) Log(v ...interface{}) {
-	if srv.logger != nil {
-		// Stampa sul logger solo se è diverso da nil
-		// TODO: in effetti è sempre diverso da nil, forse si può eliminare il check
-		srv.logger.Println(v...)
-	}
+func (srv *server) Printf(format string, v ...interface{}) {
+	srv.logger.Printf(format, v...)
 }
 
 /**************
     Server
    Adapters
 **************/
-
-func (srv *server) WithLogger(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
-	return func(ctx *fasthttp.RequestCtx) {
-		ctx.SetUserValue(LoggerKey, srv.logger)
-		handler(ctx)
-	}
-}
 
 func (srv *server) WithMoveDBAccess(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
 	return func(ctx *fasthttp.RequestCtx) {

@@ -34,31 +34,23 @@ func (sc *SessionDBComponent) GetSession(token string) (pbg.Session, error) {
 }
 
 func (sc *SessionDBComponent) AddSession(trainer pbg.Trainer, expire time.Time) (pbg.Session, error) {
-	sc.Log("Starting with adding new Session")
-
 	session, err := sc.sessionFactory(
 		WithReference(trainer), WithToken(uuid.NewV4().String()), WithExpiringDate(expire),
 	)
+
 	if err != nil {
 		return nil, err
 	}
 
-	sc.Log("Created new Session at", session)
-
-	done := make(chan interface{}, 1)
+	done := make(chan pbg.Session, 1)
 	defer close(done)
 
 	sc.sessionReqs <- func(sessions map[string]pbg.Session) {
-		sc.Log("Started session Request")
 		sessions[session.Token()] = session
-		done <- nil
+		done <- session
 	}
 
-	sc.Log("Waiting...")
-	<-done
-	sc.Log("Done!")
-
-	return session, nil
+	return <-done, nil
 }
 
 func (sc *SessionDBComponent) DeleteSession(token string) error {
