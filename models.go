@@ -18,8 +18,8 @@ type (
 	// Interface that represent a Pokèmon.
 	Pokèmon interface {
 		Name() string
-		Type() PokèmonType
 		Index() int
+		Type() PokèmonType
 		BaseStats() [6]int
 
 		// Sprites
@@ -80,22 +80,6 @@ type (
 
 		IVs() [6]int
 		EVs() [6]int
-	}
-
-	// Interfaccia che rappresenta una Natura.
-	//
-	// Interface that represent a Nature.
-	Nature interface {
-		Name() string
-		// TODO
-	}
-
-	// Interfaccia che rappresenta un'Abilità.
-	//
-	// Interface that represent an Ability.
-	Ability interface {
-		Name() string
-		// TODO
 	}
 
 	// Categoria di mossa Pokèmon.
