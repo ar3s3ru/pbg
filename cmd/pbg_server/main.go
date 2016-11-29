@@ -113,26 +113,15 @@ func routing(server pbg.Server) {
 	server.GET(StaticPath, getStaticDirHandler())
 	server.GET(RootPath, handleRoot)
 
-	server.API_GET(PokèmonIdPath,
-		pbg.Adapt(handlePokèmonId, server.WithPokèmonDBAccess))
-	server.API_GET(PokèmonPath,
-		pbg.Adapt(handlePokèmonList, server.WithPokèmonDBAccess))
+	server.API_GET(PokèmonIdPath, pbg.Adapt(handlePokèmonId, server.WithPokèmonDBAccess))
+	server.API_GET(PokèmonPath, pbg.Adapt(handlePokèmonList, server.WithPokèmonDBAccess))
 
-	server.API_POST(RegistratonPath,
-		pbg.Adapt(HandleRegistration, //withMEMProfile,
-			//server.WithLogger,
-			server.WithTrainerDBAccess))
-	server.API_POST(LoginPath,
-		pbg.Adapt(HandleLogin, //withMEMProfile,
-			server.WithTrainerDBAccess,
-			server.WithSessionDBAccess))
+	server.API_POST(RegistratonPath, pbg.Adapt(HandleRegistration, server.WithTrainerDBAccess))
+	server.API_POST(LoginPath, pbg.Adapt(HandleLogin, server.WithTrainerDBAccess, server.WithSessionDBAccess))
 
-	server.API_GET(MePath,
-		pbg.Adapt(handleMePath, withAuthorization))
-	server.API_POST(SetupPath,
-		pbg.Adapt(handleSettingTeamUp, withAuthorization,
-			server.WithMoveDBAccess,
-			server.WithPokèmonDBAccess))
+	server.API_GET(MePath, pbg.Adapt(handleMePath, withAuthorization))
+	server.API_POST(SetupPath, pbg.Adapt(handleSettingTeamUp,
+			withAuthorization, server.WithMoveDBAccess, server.WithPokèmonDBAccess))
 }
 
 func main() {
